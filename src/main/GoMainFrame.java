@@ -2,6 +2,7 @@ package main;
 
 import gomultiplayeroffline.GoMultiOffMenu;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.HashMap;
@@ -14,6 +15,10 @@ public class GoMainFrame extends JFrame {
     // global constants
     public static final int FRAME_WIDTH = 900;
     public static final int FRAME_HEIGHT = 600;
+    public static final Color COLOR_1 = new Color(255, 255, 255);
+    public static final Color COLOR_2 = new Color(1, 175, 184);
+    public static final Color COLOR_3 = new Color(51, 60, 69);
+    public static final Color COLOR_4 = new Color(24, 34, 44);
     
     // main container
     JPanel mainPanel = new JPanel();

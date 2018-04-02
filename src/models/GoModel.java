@@ -11,7 +11,9 @@ public class GoModel {
     
     private final int boardSize;
     private Player turn = Player.BLACK;
+    private Player win = null;
     private StoneType[][] board;
+    private int passCounter = 0;
     
     public GoModel(BoardSize boardSize) {
         this.boardSize = boardSize.size();
@@ -99,6 +101,23 @@ public class GoModel {
         for (Point coord : lst) {
             removeStoneAt(coord.r(), coord.c());
         }
+    }
+    
+    // win & lose stuff
+    public Player getWin() { return win; }
+    private void setWin(Player win) { this.win = win; }
+    public void winBlack() { setWin(Player.BLACK); }
+    public void winWhite() { setWin(Player.WHITE); }
+    
+    // pass stuff
+    public int getPassCounter() { return passCounter; }
+    public void addPassCounter() { this.passCounter += 1; }
+    public void resetPassCounter() {this.passCounter = 0; }
+    
+    // surrender stuff
+    public void surrenderedBy(Player player) {
+        if (player.isBlack()) winWhite();
+        else winBlack();
     }
     
     public int getBoardSize() {

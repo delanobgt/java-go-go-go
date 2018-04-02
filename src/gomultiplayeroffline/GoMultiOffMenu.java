@@ -18,25 +18,26 @@ public class GoMultiOffMenu extends JPanel {
         this.parent = parent;
         this.setLayout(new BorderLayout());
         this.setSize(new Dimension(GoMainFrame.FRAME_WIDTH, GoMainFrame.FRAME_HEIGHT));
+        this.setPreferredSize(new Dimension(GoMainFrame.FRAME_WIDTH, GoMainFrame.FRAME_HEIGHT));
         
         singleBtn = new JButton();
         singleBtn.setText("9 x 9");
         singleBtn.addActionListener(e -> {
-            parent.addComponent("multiOffPanel", new GoMultiOffPanel(parent, BoardSize.SMALL));
+            parent.addComponent("multiOffPanel", new GoMultiOffPanel(parent, "Andiana", "Budiana", BoardSize.SMALL));
             parent.changeSceneTo("multiOffPanel");
         });
         
         multiOffBtn = new JButton();
         multiOffBtn.setText("13 x 13");
         multiOffBtn.addActionListener(e -> {
-            parent.addComponent("multiOffPanel", new GoMultiOffPanel(parent, BoardSize.MEDIUM));
+            parent.addComponent("multiOffPanel", new GoMultiOffPanel(parent, "Andiana", "Budiana", BoardSize.MEDIUM));
             parent.changeSceneTo("multiOffPanel");
         });
         
         multiOnBtn = new JButton();
         multiOnBtn.setText("19 x 19");
         multiOnBtn.addActionListener(e -> {
-            parent.addComponent("multiOffPanel", new GoMultiOffPanel(parent, BoardSize.LARGE));
+            parent.addComponent("multiOffPanel", new GoMultiOffPanel(parent, "Andiana", "Budiana", BoardSize.LARGE));
             parent.changeSceneTo("multiOffPanel");
         });
         
