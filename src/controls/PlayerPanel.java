@@ -1,10 +1,12 @@
 package controls;
 
+import enums.Player;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -14,26 +16,38 @@ public class PlayerPanel extends JPanel {
     
     private static final int SIDE_MARGIN = 25;
     private String name;
+    private Player playerType;
     private JLabel lblName;
     private JLabel lblCaptured;
     private JLabel lblTerritory;
     private JLabel lblAction;
     private JLabel lblTurn;
+    private JLabel lblPlayerType;
     private Color borderColor = null;
     
-    public PlayerPanel(String name, int x, int y, int w, int h) {
+    public PlayerPanel(String name, int x, int y, int w, int h, Player playerType) {
         this.name = name;
+        this.playerType = playerType;
         this.setLayout(null);
         this.setBounds(x, y, w, h);
         
-        lblName = new JLabel();
-        lblName.setText(name);
-        lblName.setFont(new Font("Arial", Font.BOLD, 32));
-        lblName.setBounds(0, 0, getWidth(), 50);
-        lblName.setHorizontalAlignment(SwingConstants.CENTER);
-        lblName.setVerticalAlignment(SwingConstants.CENTER);
-        lblName.setOpaque(true);
-        add(lblName);
+        {
+            lblName = new JLabel();
+            lblName.setText(name);
+            lblName.setFont(new Font("Arial", Font.BOLD, 32));
+            lblName.setBounds(0, 0, getWidth(), 50);
+            lblName.setHorizontalAlignment(SwingConstants.CENTER);
+            lblName.setVerticalAlignment(SwingConstants.CENTER);
+            lblName.setOpaque(true);
+            
+            final int WIDTH = 50;
+            final int HEIGHT = 30;
+            final int SPACING = (lblName.getHeight()-HEIGHT)/2;
+            PlayerTypeLabel lblPlayerType = new PlayerTypeLabel(WIDTH, HEIGHT, SPACING, playerType);
+            
+            add(lblPlayerType);
+            add(lblName);
+        }
         
         lblCaptured = new JLabel();
         changeCapturedText("Captured: ");
@@ -65,9 +79,6 @@ public class PlayerPanel extends JPanel {
         lblTurn.setVerticalAlignment(SwingConstants.CENTER);
         lblTurn.setOpaque(true);
         add(lblTurn);
-        
-        giveTurn();
-        activate();
     }
     
     public void takeAwayTurn() {
@@ -80,7 +91,7 @@ public class PlayerPanel extends JPanel {
         changeTurnText("Thinking..");
     }
     
-    public void activate() {
+    public void activateColor() {
         this.setBackground(GoMainFrame.COLOR_4);
         
         lblName.setForeground(GoMainFrame.COLOR_1);
@@ -99,7 +110,7 @@ public class PlayerPanel extends JPanel {
         repaint();
     }
     
-    public void deactivate() {
+    public void deactivateColor() {
         this.setBackground(GoMainFrame.COLOR_4);
         
         lblName.setForeground(GoMainFrame.COLOR_1);
@@ -152,13 +163,15 @@ public class PlayerPanel extends JPanel {
     protected void paintComponent(Graphics oldG) {
         super.paintComponent(oldG);
         Graphics2D g = (Graphics2D) oldG;
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
         final int BOLD_SIZE = 6;
         if (borderColor != null) {
             g.setStroke(new BasicStroke(BOLD_SIZE));
-            g.setColor(borderColor);
+            g.setColor(borderColor);           
             g.drawRect(BOLD_SIZE/2, BOLD_SIZE/2, getWidth()-BOLD_SIZE, getHeight()-BOLD_SIZE);
         }
-    }
+    } 
 }
 
 

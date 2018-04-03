@@ -26,7 +26,6 @@ public class GoMainFrame extends JFrame {
     
     // different types of cards (Scenes)
     GoMainMenu goMainMenu;
-    GoMultiOffMenu goMultiOffMenu;
     
     // map of name -> components
     HashMap<String, Component> componentMap = new HashMap<>();
@@ -37,10 +36,8 @@ public class GoMainFrame extends JFrame {
         mainPanel.setSize(FRAME_WIDTH, FRAME_HEIGHT);
         
         goMainMenu = new GoMainMenu(this);
-        goMultiOffMenu = new GoMultiOffMenu(this);
         
         addComponent("mainMenu", goMainMenu);
-        addComponent("multiOffMenu", goMultiOffMenu);
         
         this.add(mainPanel);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

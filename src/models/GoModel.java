@@ -5,7 +5,9 @@ import enums.Player;
 import enums.StoneType;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GoModel {
     
@@ -14,6 +16,12 @@ public class GoModel {
     private Player win = null;
     private StoneType[][] board;
     private int passCounter = 0;
+    private volatile boolean boardAltered = false;
+    private List<Point> blackTerritoryList = null;
+    private List<Point> whiteTerritoryList = null;
+    private int blackCapturedScore = 0;
+    private int whiteCapturedScore = 0;
+    private Point lastMovePoint = null;
     
     public GoModel(BoardSize boardSize) {
         this.boardSize = boardSize.size();
@@ -120,7 +128,134 @@ public class GoModel {
         else winBlack();
     }
     
+    // territory stuff
+    public boolean isBoardAltered() {
+        return boardAltered;
+    }
+    public void setBoardAltered(boolean boardAltered) {
+        this.boardAltered = boardAltered;
+    }
+    
+    private Map<Point, Integer> freqOfPoint;
+    private Map<String, List<Point> > stoneToList;
+    private String _convertListToKey(List<Point> list) {
+        list.sort( (a, b) -> (a.r()*31+a.c()*37)-(b.r()*31+b.c()*37) );
+        StringBuilder sb = new StringBuilder();
+        for (Point p : list) {
+            sb.append(p.r()).append(p.c());
+        }
+        return sb.toString();
+    }
+    private int _scanTerritoryAt(int row, int col, StoneType stoneType, List<Point> connectedTerritories) {
+        if (!(0 <= row && row < boardSize)) return 0; //out of bound
+        if (!(0 <= col && col < boardSize)) return 0; //out of bound
+        //ketemu stone sejenis, cek apakah sudah benturan 1x, 2x, 3x ?
+        if (board[row][col].equals(stoneType)) {
+            Point p = new Point(row, col);
+            if (!freqOfPoint.containsKey(p)) freqOfPoint.put(p, 1);
+            else freqOfPoint.put(p, freqOfPoint.get(p)+1);
+            // crazy chain of important if statements
+            if ( ((p.r()==0 && p.c()==0) || (p.r()==0 && p.c()==boardSize-1)|| 
+                  (p.r()==boardSize-1 && p.c()==0) || (p.r()==boardSize-1 && p.c()==boardSize-1)) &&
+                  freqOfPoint.get(p) > 1 ) {
+                return -(20*20);
+            } else if ((p.r()==0 || p.r()==boardSize-1 || p.c()==0 || p.c()==boardSize-1) &&
+                    freqOfPoint.get(p) > 2){
+                return -(20*20);
+            } else if (freqOfPoint.get(p) > 3) {
+                return -(20*20);
+            } else return 1;
+        }
+        if (visit[row][col]) return 0;  //sudah pernah visit, termintate
+        visit[row][col] = true; //flag sudah visit
+        
+        // bukan ketemu EMPTY cell, tapi ketemu stone jenis lawan, return INF
+        if (!board[row][col].equals(StoneType.EMPTY)) return -(20*20); 
+        
+        if (connectedTerritories != null) { //apabila caller minta connectedStones
+            if (clean[row][col]) return 0; //sudah clean, terminate
+            clean[row][col] = true;
+            connectedTerritories.add(new Point(row, col)); //push sebuah connectedStone
+        }
+        
+        int commonStoneCount = 0;
+        for (int i = 0; i < 4; i++) {
+            commonStoneCount += _scanTerritoryAt(row+DIR_R[i], col+DIR_C[i], stoneType, connectedTerritories);
+        }
+        return commonStoneCount;
+    }
+    public boolean scanTerritoryAt(int row, int col, StoneType stoneType) {
+        List<Point> connectedTerritories = new ArrayList<>();
+        unvisit();
+        freqOfPoint = new HashMap<>();
+        int commonStoneCount = _scanTerritoryAt(row, col, stoneType, connectedTerritories);
+        if (commonStoneCount > 0) {     // if it is a "valid territory"
+            String existKey = 
+                    (stoneType.isBlack() ? "BLACK-" : "WHITE-") +
+                    _convertListToKey(new ArrayList<>(freqOfPoint.keySet()));
+            // if current connectedTerritories is larger than newly found one
+            if (!stoneToList.containsKey(existKey) || 
+                    stoneToList.get(existKey).size() > connectedTerritories.size()) {
+                stoneToList.put(existKey, connectedTerritories);
+            }
+            return true;
+        } else {            // if it is a "neutral territory" or a "no-owner territory"
+            // if failed, dirtify again (rollback)
+            for (Point p : connectedTerritories)
+                clean[p.r()][p.c()] = false;
+            return false;
+        }
+    }
+    public void scanTerritory() {
+        blackTerritoryList = new ArrayList<>();
+        whiteTerritoryList = new ArrayList<>();
+        dirtify();
+        stoneToList = new HashMap<>();
+        for (int r = 0; r < boardSize; r++) {
+            for (int c = 0; c < boardSize; c++) {
+                if (board[r][c].isEmpty()) {
+                    if(!scanTerritoryAt(r, c, StoneType.BLACK)) {
+                        scanTerritoryAt(r, c, StoneType.WHITE);
+                    }
+                }
+            }
+        }
+        for (Map.Entry<String, List<Point> > entry : stoneToList.entrySet()) {
+            if (entry.getKey().contains("BLACK-")) {
+                blackTerritoryList.addAll(entry.getValue());
+            } else if (entry.getKey().contains("WHITE-")) {
+                whiteTerritoryList.addAll(entry.getValue());
+            }
+        }
+    }
+
+    public List<Point> getBlackTerritoryList() { return blackTerritoryList; }
+    public List<Point> getWhiteTerritoryList() { return whiteTerritoryList; }
+    
     public int getBoardSize() {
         return boardSize;
     }
+    
+    // scoring stuff
+    public int getBlackTerritoryScore() {
+        scanTerritory();
+        return blackTerritoryList.size();
+    }
+    public int getWhiteTerritoryScore() {
+        scanTerritory();
+        return whiteTerritoryList.size();
+    }
+    public int getBlackCapturedScore() { return blackCapturedScore; }
+    public void addBlackCapturedScore(int blackCapturedScore) { this.blackCapturedScore += blackCapturedScore; }
+    public int getWhiteCapturedScore() { return whiteCapturedScore; }
+    public void addWhiteCapturedScore(int whiteCapturedScore) { this.whiteCapturedScore += whiteCapturedScore; }
+    public double getBlackTotalScore() {
+        return getBlackCapturedScore() + getBlackTerritoryScore();
+    }
+    public double getWhiteTotalScore() {
+        return getWhiteCapturedScore() + getWhiteTerritoryScore() + (6.5);
+    }
+    
+    public void setLastMovePoint (Point p) { this.lastMovePoint = p; }
+    public Point getLastMovePoint() { return lastMovePoint; }
 }

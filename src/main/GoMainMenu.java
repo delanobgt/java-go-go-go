@@ -1,5 +1,6 @@
 package main;
 
+import gomultiplayeroffline.GoMultiOffMenu;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JButton;
@@ -20,19 +21,20 @@ public class GoMainMenu extends JPanel {
         singleBtn = new JButton();
         singleBtn.setText("Singleplayer");
         singleBtn.addActionListener(e -> {
-            parent.changeSceneTo("single");
+            parent.changeSceneTo("singleMenu");
         });
         
         multiOffBtn = new JButton();
         multiOffBtn.setText("Multiplayer<br>(Offline)");
         multiOffBtn.addActionListener(e -> {
+            parent.addComponent("multiOffMenu", new GoMultiOffMenu(parent));
             parent.changeSceneTo("multiOffMenu");
         });
         
         multiOnBtn = new JButton();
         multiOnBtn.setText("Multiplayer<br>(Online)");
         multiOnBtn.addActionListener(e -> {
-            parent.changeSceneTo("multiOn");
+            parent.changeSceneTo("multiOnMenu");
         });
         
         this.add(singleBtn, BorderLayout.NORTH);

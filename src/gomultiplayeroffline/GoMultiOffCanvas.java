@@ -1,7 +1,6 @@
 package gomultiplayeroffline;
 
 import controls.LegendJLabel;
-import enums.StoneType;
 import java.awt.BasicStroke;
 import models.GoModel;
 import java.awt.Color;
@@ -24,11 +23,13 @@ public class GoMultiOffCanvas extends JPanel {
     
     private final int CELL_SIZE;
     private static final int CELL_MARGIN = 2;
-    private static final int ANIMATION_DELAY = 10;
+    private static final int ANIMATION_DELAY = 50;
     private int canvasWidth;
     private int canvasHeight;
     private GoModel goModel;
+    private GoMultiOffPanel parentContainer;
     private Timer timer;
+    private boolean territoryBeingShown = false;
     
     private volatile int mouseX = -1;
     private volatile int mouseY = -1;
@@ -52,8 +53,9 @@ public class GoMultiOffCanvas extends JPanel {
         }        
     };
     
-    public GoMultiOffCanvas(GoModel goModel) {
+    public GoMultiOffCanvas(GoModel goModel, GoMultiOffPanel parentContainer) {
         this.goModel = goModel;
+        this.parentContainer = parentContainer;
         canvasWidth = canvasHeight = GoMainFrame.FRAME_HEIGHT-GoMultiOffPanel.CONTROL_PANEL_HEIGHT;
         CELL_SIZE = canvasWidth/(goModel.getBoardSize()+2);
         this.setLayout(null);
@@ -66,6 +68,10 @@ public class GoMultiOffCanvas extends JPanel {
         this.addMouseMotionListener(mouseMotionAdapter);
         
         timer = new Timer(ANIMATION_DELAY, (e) -> {
+            if (goModel.isBoardAltered()) {
+                goModel.setBoardAltered(false);
+                goModel.scanTerritory();
+            }
             repaint();
         });
         timer.start();
@@ -109,11 +115,23 @@ public class GoMultiOffCanvas extends JPanel {
         }
         //remove other zero-liberty stones, except current attacking stone
         for (List<Point> connStones : connStonesList) {
-            if (!connStones.contains(userPoint))
+            if (!connStones.contains(userPoint)) {
+                if (connStones.size() > 0) {
+                    Point p = connStones.get(0);
+                    if (goModel.getStoneAt(p.r(), p.c()).isBlack())
+                        goModel.addWhiteCapturedScore(connStones.size());
+                    else if (goModel.getStoneAt(p.r(), p.c()).isWhite())
+                        goModel.addBlackCapturedScore(connStones.size());
+                }
                 goModel.removeAllStones(connStones);
+            }
         }
         
+        goModel.setBoardAltered(true);
+        goModel.resetPassCounter();
         goModel.toggleTurn();
+        goModel.setLastMovePoint(userPoint);
+        parentContainer.updatePlayerStatus();
     }
     
     @Override
@@ -144,6 +162,37 @@ public class GoMultiOffCanvas extends JPanel {
             }
         }
         
+        // paint territories
+        {
+            final int TERRITORY_SIZE = 10;
+            if (territoryBeingShown) {
+                List<Point> blackTerritoryList = goModel.getBlackTerritoryList();
+                if (blackTerritoryList != null) {
+                    g.setColor(GoMainFrame.COLOR_4);
+                    for (Point p : blackTerritoryList) {
+                        g.fillRect(
+                                (p.c()+1)*CELL_SIZE+(CELL_SIZE/2)-(TERRITORY_SIZE/2), 
+                                (p.r()+1)*CELL_SIZE+(CELL_SIZE/2)-(TERRITORY_SIZE/2), 
+                                TERRITORY_SIZE,
+                                TERRITORY_SIZE
+                        );
+                    }
+                }
+                List<Point> whiteTerritoryList = goModel.getWhiteTerritoryList();
+                if (whiteTerritoryList != null) {
+                    g.setColor(Color.WHITE);
+                    for (Point p : whiteTerritoryList) {
+                        g.fillRect(
+                                (p.c()+1)*CELL_SIZE+(CELL_SIZE/2)-(TERRITORY_SIZE/2), 
+                                (p.r()+1)*CELL_SIZE+(CELL_SIZE/2)-(TERRITORY_SIZE/2), 
+                                TERRITORY_SIZE,
+                                TERRITORY_SIZE
+                        );
+                    }
+                }
+            }
+        }
+        
         //paint mouse highlight
         {
             int r = mouseY/CELL_SIZE, c = mouseX/CELL_SIZE;
@@ -164,7 +213,6 @@ public class GoMultiOffCanvas extends JPanel {
                 if (goModel.getStoneAt(r, c).isBlack()) {
                     drawStone(g, r+1, c+1, 0); // translate coordinate forward (+1,+1)
                 } else if (goModel.getStoneAt(r, c).isWhite()) {
-                    g.setColor(Color.WHITE);
                     drawStone(g, r+1, c+1, 1); // translate coordinate forward (+1,+1)
                 }
             }
@@ -201,4 +249,8 @@ public class GoMultiOffCanvas extends JPanel {
         );
     }
     
+    public void toggleTerritoryBeingShown() {
+        territoryBeingShown = !territoryBeingShown;
+    }
+    public boolean isTerritoryBeingShown() { return territoryBeingShown; }
 }
