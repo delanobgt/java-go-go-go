@@ -103,6 +103,10 @@ public class GoMultiOffCanvas extends JPanel {
         if (goModel.isOccupiedAt(userR, userC)) {
             return;
         }
+        
+        goModel.backupBoard();
+        
+        // coba taruh batu dulu
         goModel.setStoneAt(userR, userC, goModel.getCurrentStoneType());
         
         List<List<Point>> connStonesList = goModel.getListOfDeadStones();
@@ -113,20 +117,36 @@ public class GoMultiOffCanvas extends JPanel {
                 JOptionPane.showMessageDialog(this, "Suicidal move is not allowed!");
                 return;
         }
+        
+        int blackCapturedScore = 0;
+        int whiteCapturedScore = 0;
         //remove other zero-liberty stones, except current attacking stone
         for (List<Point> connStones : connStonesList) {
             if (!connStones.contains(userPoint)) {
                 if (connStones.size() > 0) {
                     Point p = connStones.get(0);
                     if (goModel.getStoneAt(p.r(), p.c()).isBlack())
-                        goModel.addWhiteCapturedScore(connStones.size());
+                        whiteCapturedScore += connStones.size();
                     else if (goModel.getStoneAt(p.r(), p.c()).isWhite())
-                        goModel.addBlackCapturedScore(connStones.size());
+                        blackCapturedScore += connStones.size();
                 }
                 goModel.removeAllStones(connStones);
             }
         }
         
+        // Ko Rule implementation
+        // if infinite cycle detected
+        if (goModel.isCurrentStateRecently()) {
+            goModel.restoreBoard();
+            JOptionPane.showMessageDialog(this, "Ko Rule violated!");
+            return;
+        // if no infinite cycle detected
+        } else {
+            goModel.addBlackCapturedScore(blackCapturedScore);
+            goModel.addWhiteCapturedScore(whiteCapturedScore);
+        }
+        
+        goModel.memorizeCurrentState();
         goModel.setBoardAltered(true);
         goModel.resetPassCounter();
         goModel.toggleTurn();

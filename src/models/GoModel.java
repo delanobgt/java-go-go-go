@@ -6,8 +6,10 @@ import enums.StoneType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 public class GoModel {
     
@@ -26,6 +28,7 @@ public class GoModel {
     public GoModel(BoardSize boardSize) {
         this.boardSize = boardSize.size();
         board = new StoneType[this.boardSize][this.boardSize];
+        backupBoard = new StoneType[this.boardSize][this.boardSize];
         for (int i = 0; i < board.length; i++)
             Arrays.fill(board[i], StoneType.EMPTY);
     }
@@ -258,4 +261,39 @@ public class GoModel {
     
     public void setLastMovePoint (Point p) { this.lastMovePoint = p; }
     public Point getLastMovePoint() { return lastMovePoint; }
+    
+    private Queue<String> recentTwoStates = new LinkedList<>();
+    public void memorizeCurrentState() {
+        while (recentTwoStates.size() > 1)
+            recentTwoStates.poll();
+        recentTwoStates.add(getStateHash());
+    }
+    public boolean isCurrentStateRecently() {
+        return recentTwoStates.contains(getStateHash());
+    }
+    private String getStateHash() {
+        StringBuilder sb = new StringBuilder();
+        for (int r = 0; r < boardSize; r++) {
+            for (int c = 0; c < boardSize; c++) {
+                sb.append(board[r][c].toString());
+            }
+        }
+        return sb.toString();
+    }
+    
+    private StoneType[][] backupBoard;
+    public void backupBoard() {
+        for (int r = 0; r < boardSize; r++) {
+            for (int c = 0; c < boardSize; c++) {
+                backupBoard[r][c] = board[r][c];
+            }
+        }
+    }
+    public void restoreBoard() {
+        for (int r = 0; r < boardSize; r++) {
+            for (int c = 0; c < boardSize; c++) {
+                board[r][c] = backupBoard[r][c];
+            }
+        }
+    }
 }

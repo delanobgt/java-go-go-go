@@ -20,4 +20,10 @@ public enum StoneType {
     public boolean isEmpty() {
         return this.type == -1;
     }
+    @Override
+    public String toString() {
+        if (this.isBlack()) return "0";
+        if (this.isWhite()) return "1";
+        return "-1";
+    }
 }
