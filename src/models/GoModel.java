@@ -3,6 +3,7 @@ package models;
 import enums.BoardSize;
 import enums.Player;
 import enums.StoneType;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-public class GoModel {
+public class GoModel implements Serializable {
     
     private final int boardSize;
     private Player turn = Player.BLACK;

@@ -1,6 +1,5 @@
 package main;
 
-import gomultiplayeroffline.GoMultiOffMenu;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -19,6 +18,8 @@ public class GoMainFrame extends JFrame {
     public static final Color COLOR_2 = new Color(1, 175, 184);
     public static final Color COLOR_3 = new Color(51, 60, 69);
     public static final Color COLOR_4 = new Color(24, 34, 44);
+    public static final int ROOM_INFO_SERVER_PORT = 9898;
+    public static final int GAME_SERVER_PORT = 6666;
     
     // main container
     JPanel mainPanel = new JPanel();
