@@ -4,6 +4,7 @@ import enums.BoardSize;
 import enums.Player;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.net.Socket;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -35,6 +36,9 @@ public class GoCreateRoom extends JPanel {
     JLabel lblStatus;
     JButton btnCreate;
  
+    RoomInfoServer roomInfoServer; 
+    GameServer gameServer;
+    
     public GoCreateRoom (GoMainFrame parent) {
         this.parent = parent;
         this.setLayout(new FlowLayout());
@@ -44,7 +48,7 @@ public class GoCreateRoom extends JPanel {
         btnBack = new JButton();
         btnBack.setText("< BACK");
         btnBack.addActionListener(e -> {
-            parent.changeSceneTo("mainMenu");
+            parent.changeSceneTo("multiOnMenu");
         });
         this.add(btnBack);
         
@@ -101,16 +105,16 @@ public class GoCreateRoom extends JPanel {
         btnCreate = new JButton();
         btnCreate.setText("Create Room!");
         btnCreate.addActionListener(e -> {
-            BoardSize boardSize = null;
+            if (!validateForm()) return;
+            
+            final BoardSize boardSize;
             if (rdNineSize.isSelected()) boardSize = BoardSize.SMALL;
             else if (rdThirteenSize.isSelected()) boardSize = BoardSize.MEDIUM;
             else boardSize = BoardSize.LARGE;
-            
-            Player playerType = null;
+             
+            final Player playerType;
             if (rdBlack.isSelected()) playerType = Player.BLACK;
             else playerType = Player.WHITE;
-            
-            if (!validateForm()) return;
             
             RoomModel roomModel = new RoomModel(
                     txtFirstName.getText(), 
@@ -118,7 +122,43 @@ public class GoCreateRoom extends JPanel {
                     playerType
             );
             
+            btnCreate.setEnabled(false);
+            txtFirstName.setEditable(false);
             
+            roomInfoServer = new RoomInfoServer(roomModel);
+            roomInfoServer.startServer();
+            
+            gameServer = new GameServer();
+            new Thread(() -> {
+                Socket socket = null;
+                if ( (socket = gameServer.waitForConnection()) != null ) {
+                    roomInfoServer.stopServer();
+                    GameSocket gameSocket = new GameSocket(socket);
+                    String serverName = txtFirstName.getText();
+                    {
+                        String firstName, secondName;
+                        String clientName = (String) gameSocket.receive();
+                        if (playerType.isBlack()) {
+                            firstName = serverName;
+                            secondName = clientName;
+                        } else {
+                            firstName = clientName;
+                            secondName = serverName;
+                        }
+                        parent.removeComponent("createRoom");
+                        parent.addComponent("multiOnPanel", new GoMultiOnPanel(
+                                parent,
+                                playerType,
+                                firstName,
+                                secondName,
+                                boardSize,
+                                gameSocket
+                        ));
+                        parent.changeSceneTo("multiOnPanel");
+                    }
+                    System.out.println("opponent found!");
+                }
+            }).start();
         });
         this.add(btnCreate);
     }

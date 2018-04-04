@@ -43,4 +43,13 @@ public class RoomInfoClient {
             System.out.println(ex);
         }
     }
+    
+    public void close() {
+        try {
+            ois.close();
+            socket.close();
+        } catch (Exception ex) {
+            System.out.println(ex); 
+        }
+    }
 }

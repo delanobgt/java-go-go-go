@@ -100,7 +100,7 @@ public class GoMultiOffMenu extends JPanel {
     private boolean validateForm() {
         int firstLength = txtFirstName.getText().length();
         int secondLength = txtSecondName.getText().length();
-        if (!(3 <= firstLength && firstLength <= 8) || !(3 <= secondLength && secondLength <= 8)) {
+        if (!(3 <= firstLength && firstLength <= 7) || !(3 <= secondLength && secondLength <= 7)) {
             lblStatus.setText("Name must be between 3 to 8 characters!");
             return false;
         }

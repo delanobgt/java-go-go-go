@@ -6,23 +6,31 @@ import java.io.Serializable;
 
 public class RoomModel implements Serializable {
     
-    private String roomOwner;
+    private String roomOwnerName;
     private BoardSize boardSize;
     private Player playerType;
 
-    public RoomModel(String roomOwner, BoardSize boardSize, Player playerType) {
-        this.roomOwner = roomOwner;
+    public RoomModel(String roomOwnerName, BoardSize boardSize, Player playerType) {
+        this.roomOwnerName = roomOwnerName;
         this.boardSize = boardSize;
         this.playerType = playerType;
     }
 
-    public String getRoomOwner() {
-        return roomOwner;
+    public String getRoomOwnerName() {
+        return roomOwnerName;
     }
     public BoardSize getBoardSize() {
         return boardSize;
     }
     public Player getPlayerType() {
         return playerType;
+    }
+    
+    public String toString() {
+        return String.format("<html> Owner: %s<br> Owner Player Type: %s<br> Board Size: %d<br></html>",
+                roomOwnerName,
+                playerType.toString(),
+                boardSize.size()
+        );
     }
 }

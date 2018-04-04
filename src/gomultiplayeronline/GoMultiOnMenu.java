@@ -37,7 +37,7 @@ public class GoMultiOnMenu extends JPanel {
         btnJoinRoom = new JButton();
         btnJoinRoom.setText("Join a Room");
         btnJoinRoom.addActionListener(e -> {
-//            parent.addComponent("joinRoom", new GoJoinRoom(parent));
+            parent.addComponent("joinRoom", new GoJoinRoom(parent));
             parent.changeSceneTo("joinRoom");
         });
         this.add(btnJoinRoom);

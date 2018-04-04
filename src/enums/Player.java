@@ -16,4 +16,8 @@ public enum Player {
     public boolean isWhite() {
         return this.type == 1;
     }
+    public String toString() {
+        if (this.isBlack()) return "BLACK";
+        else return "WHITE";
+    }
 }

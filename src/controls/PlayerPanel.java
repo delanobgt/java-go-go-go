@@ -158,7 +158,7 @@ public class PlayerPanel extends JPanel {
         }
         lbl.setText(sb.toString());
     }
-
+    
     @Override
     protected void paintComponent(Graphics oldG) {
         super.paintComponent(oldG);
