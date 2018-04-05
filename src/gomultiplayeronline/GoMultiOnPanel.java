@@ -21,6 +21,9 @@ public class GoMultiOnPanel extends JPanel {
     
     public static final int CONTROL_PANEL_HEIGHT = 40;
     GoMainFrame parent;
+    private String firstName;
+    private String secondName;
+    private BoardSize boardSize;
     private GoModel goModel;
     private GoMultiOnCanvas goMultiOffCanvas;
     private PlayerPanel firstPanel;
@@ -32,6 +35,9 @@ public class GoMultiOnPanel extends JPanel {
     
     public GoMultiOnPanel(GoMainFrame parent, Player playerType, String firstName, String secondName, BoardSize boardSize, GameSocket gameSocket) {
         this.parent = parent;
+        this.firstName = firstName;
+        this.secondName = secondName;
+        this.boardSize = boardSize;
         this.playerType = playerType;
         waitingOpponent = playerType.isBlack() ? false : true;
         this.goModel = new GoModel(boardSize);
@@ -113,27 +119,12 @@ public class GoMultiOnPanel extends JPanel {
         passBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                goModel.addPassCounter();
-                goModel.toggleTurn();
-                updatePlayerStatus();
-                if (goModel.getPassCounter() >= 2) {
-                    if (goModel.getWhiteTotalScore() > goModel.getBlackTotalScore())
-                        goModel.winWhite();
-                    else
-                        goModel.winBlack();
-                    
-                    GameOverPanel gameOverPanel = new GameOverPanel(firstName, secondName, goModel);
-                    
-                    JOptionPane.showMessageDialog(parent, gameOverPanel);
-                    
-                    if (gameOverPanel.isPlayAgainSelected()) {
-                        parent.addComponent("multiOffPanel", new GoMultiOnPanel(parent, playerType, firstName, secondName, boardSize, gameSocket));
-                        parent.changeSceneTo("multiOffPanel");
-                    } else {
-                        parent.removeComponent("multiOffPanel");
-                        parent.changeSceneTo("mainMenu");
-                    }
+                if (!goModel.getTurn().equals(playerType)) {
+                    JOptionPane.showMessageDialog(parent, "Not you turn yet!");
+                    return;
                 }
+                gameSocket.send("PASS:"+goModel.getTurn().toString());
+                handlePassBtn();
             }
         });
         controlPanel.add(passBtn);
@@ -148,24 +139,14 @@ public class GoMultiOnPanel extends JPanel {
         surrenderBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                if (!goModel.getTurn().equals(playerType)) {
+                    JOptionPane.showMessageDialog(parent, "Not you turn yet!");
+                    return;
+                }
                 int response = JOptionPane.showConfirmDialog(parent, "Are you sure?", "Surrender", JOptionPane.YES_NO_OPTION);
                 if (response == JOptionPane.YES_OPTION) {
-                    goModel.surrenderedBy(goModel.getTurn());
-                    
-                    SurrenderPanel surrenderPanel = new SurrenderPanel(
-                            goModel.getWin().isBlack() ? "BLACK" : "WHITE",
-                            goModel.getWin().isBlack() ? "WHITE" : "BLACK"                
-                    );
-                    
-                    JOptionPane.showMessageDialog(parent, surrenderPanel);
-                    
-                    if (surrenderPanel.isPlayAgainSelected()) {
-                        parent.addComponent("multiOffPanel", new GoMultiOnPanel(parent, playerType, firstName, secondName, boardSize, gameSocket));
-                        parent.changeSceneTo("multiOffPanel");
-                    } else {
-                        parent.removeComponent("multiOffPanel");
-                        parent.changeSceneTo("mainMenu");
-                    }
+                    gameSocket.send("SURRENDER:"+goModel.getTurn().toString());
+                    handleSurrenderBtn();
                 }
             }
         });
@@ -173,6 +154,34 @@ public class GoMultiOnPanel extends JPanel {
         
         updatePlayerStatus();
         startListeningSocket();
+    }
+    
+    private void handlePassBtn() {
+        goModel.addPassCounter();
+        goModel.toggleTurn();
+        updatePlayerStatus();
+        if (goModel.getPassCounter() >= 2) {
+            if (goModel.getWhiteTotalScore() > goModel.getBlackTotalScore())
+                goModel.winWhite();
+            else
+                goModel.winBlack();
+            
+            JOptionPane.showMessageDialog(parent, "Game ended with 2 passes!");
+            parent.changeSceneTo("mainMenu");
+        }
+    }
+    
+    private void handleSurrenderBtn() {
+        goModel.surrenderedBy(goModel.getTurn());
+        
+        SurrenderPanel surrenderPanel = new SurrenderPanel(
+                goModel.getWin().isBlack() ? "BLACK" : "WHITE",
+                goModel.getWin().isBlack() ? "WHITE" : "BLACK"                
+        );
+
+        JOptionPane.showMessageDialog(parent, "lolol");
+        
+        parent.changeSceneTo("mainMenu");
     }
     
     public void updatePlayerStatus() {
@@ -237,8 +246,12 @@ public class GoMultiOnPanel extends JPanel {
                     goMultiOffCanvas.handleUserClick(Integer.parseInt(coords[0]), Integer.parseInt(coords[1]));
                     toggleWaitingOpponent();
                     if (waitingOpponent) System.out.println("anjing salah");
+                } else if (type.equals("SURRENDER")) {
+                    handleSurrenderBtn();
+                } else if (type.equals("PASS")) {
+                    handlePassBtn();
                 } else {
-                    System.out.println("something else");
+                    System.out.println("something else!!");
                 }
             }
         }).start();
