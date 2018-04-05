@@ -27,8 +27,8 @@ public class GoMultiOnCanvas extends JPanel {
     private int canvasWidth;
     private int canvasHeight;
     private GoModel goModel;
-    private GoMultiOnPanel parentContainer;
     private Timer timer;
+    private GoMultiOnPanel parentContainer;
     private boolean territoryBeingShown = false;
     
     private volatile int mouseX = -1;
@@ -37,7 +37,16 @@ public class GoMultiOnCanvas extends JPanel {
     private MouseAdapter mouseAdapter = new MouseAdapter() {
         @Override
         public void mousePressed(MouseEvent e) {
-            handleUserClick(e.getX(), e.getY());
+            if (!parentContainer.isWaitingOpponent()) {
+                if (handleUserClick(e.getX(), e.getY())) {
+                    parentContainer.toggleWaitingOpponent();
+                    parentContainer.sendRequest(String.format(
+                            "STONE:%d,%d",
+                            e.getX(),
+                            e.getY()
+                    ));
+                }
+            }
         }
         @Override
         public void mouseExited(MouseEvent e) {
@@ -67,14 +76,10 @@ public class GoMultiOnCanvas extends JPanel {
         this.addMouseListener(mouseAdapter);
         this.addMouseMotionListener(mouseMotionAdapter);
         
-        timer = new Timer(ANIMATION_DELAY, (e) -> {
-            if (goModel.isBoardAltered()) {
-                goModel.setBoardAltered(false);
-                goModel.scanTerritory();
-            }
+        this.timer = new Timer(ANIMATION_DELAY, e -> {
             repaint();
         });
-        timer.start();
+        this.timer.start();
         
         // add Legend labels (ex. A1, A2, C5)
         for (int r = 1; r <= goModel.getBoardSize(); r++) {
@@ -91,17 +96,17 @@ public class GoMultiOnCanvas extends JPanel {
         }
     }
     
-    private void handleUserClick(int userX, int userY) {
+    public boolean handleUserClick(int userX, int userY) {
         // translate coordinate backward (-1, -1)
         int userR = userY/CELL_SIZE-1;
         int userC = userX/CELL_SIZE-1;
         // check if user is still inside valid bounds
         if (! (0 <= userR && userR < goModel.getBoardSize() &&
-                0 <= userC && userC < goModel.getBoardSize()) ) return;
+                0 <= userC && userC < goModel.getBoardSize()) ) return false;
         Point userPoint = new Point(userR, userC);
         
         if (goModel.isOccupiedAt(userR, userC)) {
-            return;
+            return false;
         }
         
         goModel.backupBoard();
@@ -115,7 +120,7 @@ public class GoMultiOnCanvas extends JPanel {
             connStonesList.get(0).contains(userPoint) ) {
                 goModel.removeStoneAt(userR, userC);
                 JOptionPane.showMessageDialog(this, "Suicidal move is not allowed!");
-                return;
+                return false;
         }
         
         int blackCapturedScore = 0;
@@ -139,7 +144,7 @@ public class GoMultiOnCanvas extends JPanel {
         if (goModel.isCurrentStateRecently()) {
             goModel.restoreBoard();
             JOptionPane.showMessageDialog(this, "Ko Rule violated!");
-            return;
+            return false;
         // if no infinite cycle detected
         } else {
             goModel.addBlackCapturedScore(blackCapturedScore);
@@ -147,11 +152,12 @@ public class GoMultiOnCanvas extends JPanel {
         }
         
         goModel.memorizeCurrentState();
-        goModel.setBoardAltered(true);
+        goModel.scanTerritory();
         goModel.resetPassCounter();
         goModel.toggleTurn();
         goModel.setLastMovePoint(userPoint);
         parentContainer.updatePlayerStatus();
+        return true;
     }
     
     @Override
@@ -214,7 +220,7 @@ public class GoMultiOnCanvas extends JPanel {
         }
         
         //paint mouse highlight
-        {
+        if (!parentContainer.isWaitingOpponent()) {
             int r = mouseY/CELL_SIZE, c = mouseX/CELL_SIZE;
             // only paint shadow at valid grids
             if ( (1 <= r && r <= goModel.getBoardSize() &&

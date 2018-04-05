@@ -19,7 +19,6 @@ public class GoModel implements Serializable {
     private Player win = null;
     private StoneType[][] board;
     private int passCounter = 0;
-    private volatile boolean boardAltered = false;
     private List<Point> blackTerritoryList = null;
     private List<Point> whiteTerritoryList = null;
     private int blackCapturedScore = 0;
@@ -132,14 +131,6 @@ public class GoModel implements Serializable {
         else winBlack();
     }
     
-    // territory stuff
-    public boolean isBoardAltered() {
-        return boardAltered;
-    }
-    public void setBoardAltered(boolean boardAltered) {
-        this.boardAltered = boardAltered;
-    }
-    
     private Map<Point, Integer> freqOfPoint;
     private Map<String, List<Point> > stoneToList;
     private String _convertListToKey(List<Point> list) {
@@ -158,7 +149,14 @@ public class GoModel implements Serializable {
             Point p = new Point(row, col);
             if (!freqOfPoint.containsKey(p)) freqOfPoint.put(p, 1);
             else freqOfPoint.put(p, freqOfPoint.get(p)+1);
+            
             // crazy chain of important if statements
+//            System.out.println(freqOfPoint);
+//            System.out.println(freqOfPoint.size());
+//            System.out.println(p.r()+" "+p.c());
+//            System.out.println(freqOfPoint.get(p));
+//            System.out.println("");System.out.println("");
+//            System.out.println("");System.out.println("");
             if ( ((p.r()==0 && p.c()==0) || (p.r()==0 && p.c()==boardSize-1)|| 
                   (p.r()==boardSize-1 && p.c()==0) || (p.r()==boardSize-1 && p.c()==boardSize-1)) &&
                   freqOfPoint.get(p) > 1 ) {
@@ -192,6 +190,7 @@ public class GoModel implements Serializable {
         List<Point> connectedTerritories = new ArrayList<>();
         unvisit();
         freqOfPoint = new HashMap<>();
+        if (freqOfPoint == null) System.out.println("NULL BEGO!");
         int commonStoneCount = _scanTerritoryAt(row, col, stoneType, connectedTerritories);
         if (commonStoneCount > 0) {     // if it is a "valid territory"
             String existKey = 

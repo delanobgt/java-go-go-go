@@ -14,7 +14,6 @@ import javax.swing.JTextField;
 import main.GoMainFrame;
 import models.RoomModel;
 
-
 public class GoCreateRoom extends JPanel {
     
     GoMainFrame parent;

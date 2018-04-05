@@ -27,8 +27,8 @@ public class GoMultiOffCanvas extends JPanel {
     private int canvasWidth;
     private int canvasHeight;
     private GoModel goModel;
-    private GoMultiOffPanel parentContainer;
     private Timer timer;
+    private GoMultiOffPanel parentContainer;
     private boolean territoryBeingShown = false;
     
     private volatile int mouseX = -1;
@@ -67,14 +67,10 @@ public class GoMultiOffCanvas extends JPanel {
         this.addMouseListener(mouseAdapter);
         this.addMouseMotionListener(mouseMotionAdapter);
         
-        timer = new Timer(ANIMATION_DELAY, (e) -> {
-            if (goModel.isBoardAltered()) {
-                goModel.setBoardAltered(false);
-                goModel.scanTerritory();
-            }
+        this.timer = new Timer(ANIMATION_DELAY, e -> {
             repaint();
         });
-        timer.start();
+        this.timer.start();
         
         // add Legend labels (ex. A1, A2, C5)
         for (int r = 1; r <= goModel.getBoardSize(); r++) {
@@ -147,7 +143,7 @@ public class GoMultiOffCanvas extends JPanel {
         }
         
         goModel.memorizeCurrentState();
-        goModel.setBoardAltered(true);
+        goModel.scanTerritory();
         goModel.resetPassCounter();
         goModel.toggleTurn();
         goModel.setLastMovePoint(userPoint);

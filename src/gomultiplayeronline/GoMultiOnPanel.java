@@ -27,11 +27,15 @@ public class GoMultiOnPanel extends JPanel {
     private PlayerPanel secondPanel;
     private JPanel controlPanel;
     private Player playerType;
+    private GameSocket gameSocket;
+    private volatile boolean waitingOpponent;
     
     public GoMultiOnPanel(GoMainFrame parent, Player playerType, String firstName, String secondName, BoardSize boardSize, GameSocket gameSocket) {
         this.parent = parent;
         this.playerType = playerType;
+        waitingOpponent = playerType.isBlack() ? false : true;
         this.goModel = new GoModel(boardSize);
+        this.gameSocket = gameSocket;
         this.setLayout(null);
         this.setSize(new Dimension(GoMainFrame.FRAME_WIDTH, GoMainFrame.FRAME_HEIGHT));
         this.setPreferredSize(new Dimension(GoMainFrame.FRAME_WIDTH, GoMainFrame.FRAME_HEIGHT));
@@ -168,6 +172,7 @@ public class GoMultiOnPanel extends JPanel {
         controlPanel.add(surrenderBtn);
         
         updatePlayerStatus();
+        startListeningSocket();
     }
     
     public void updatePlayerStatus() {
@@ -212,5 +217,34 @@ public class GoMultiOnPanel extends JPanel {
         firstPanel.changeCapturedText("Captured: ", "white-"+goModel.getBlackCapturedScore());
         secondPanel.changeCapturedText("Captured: ", "white-"+goModel.getWhiteCapturedScore());
     }
+
+    public boolean isWaitingOpponent() {
+        return waitingOpponent;
+    }
+    public void toggleWaitingOpponent() {
+        waitingOpponent = !waitingOpponent;
+    }
     
+    private void startListeningSocket() {
+        new Thread(() -> {
+            System.out.println("start listening for request..");
+            while (true) {
+                String request = (String) gameSocket.receive();
+                String[] splitted = request.split(":");
+                String type = splitted[0];
+                if (type.equals("STONE")) {
+                    String[] coords = splitted[1].split(",");
+                    goMultiOffCanvas.handleUserClick(Integer.parseInt(coords[0]), Integer.parseInt(coords[1]));
+                    toggleWaitingOpponent();
+                    if (waitingOpponent) System.out.println("anjing salah");
+                } else {
+                    System.out.println("something else");
+                }
+            }
+        }).start();
+    }
+    
+    public void sendRequest(String request) {
+        gameSocket.send(request);
+    }
 }
