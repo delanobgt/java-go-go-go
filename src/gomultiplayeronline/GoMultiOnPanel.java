@@ -249,6 +249,7 @@ public class GoMultiOnPanel extends JPanel {
                 } else if (type.equals("SURRENDER")) {
                     handleSurrenderBtn();
                 } else if (type.equals("PASS")) {
+                    toggleWaitingOpponent();
                     handlePassBtn();
                 } else {
                     System.out.println("something else!!");
