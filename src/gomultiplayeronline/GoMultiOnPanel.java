@@ -8,6 +8,7 @@ import controls.SurrenderPanel;
 import enums.BoardSize;
 import enums.Player;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JLabel;
@@ -92,6 +93,7 @@ public class GoMultiOnPanel extends JPanel {
         
         PersistentButton territoryBtn = new PersistentButton(
                 "Show Territory",
+                new Font("Arial", Font.BOLD, 12),
                 BTN_SPACING, 
                 V_MARGIN,
                 BTN_WIDTH, 
@@ -111,6 +113,7 @@ public class GoMultiOnPanel extends JPanel {
         
         JLabel passBtn = new ControlButton(
                 "Pass",
+                new Font("Arial", Font.BOLD, 12),
                 2*BTN_SPACING+BTN_WIDTH, 
                 V_MARGIN, 
                 BTN_WIDTH,
@@ -131,6 +134,7 @@ public class GoMultiOnPanel extends JPanel {
         
         JLabel surrenderBtn = new ControlButton(
                 "Surrender",
+                new Font("Arial", Font.BOLD, 12),
                 3*BTN_SPACING+2*BTN_WIDTH,
                 V_MARGIN,
                 BTN_WIDTH, 

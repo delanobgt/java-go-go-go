@@ -5,22 +5,32 @@
  */
 package gomultiplayeronline;
 
+import controls.ControlButton;
+import controls.MaterialButton;
 import enums.BoardSize;
 import enums.Player;
+import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import main.GoMainFrame;
 import models.RoomModel;
 
 public class GoJoinRoom extends JPanel {
     
     GoMainFrame parent;
-    JButton btnBack;
+    JLabel btnBack;
+    JLabel lblTitle;
     
     JLabel lblFirstName;
     JTextField txtFirstName;
@@ -29,109 +39,211 @@ public class GoJoinRoom extends JPanel {
     JTextField txtRoomCode;
     
     JLabel lblStatus;
-    JButton btnJoin;
+    JLabel btnJoin;
     
     RoomInfoClient roomInfoClient;
     
+    private static final int BTN_WIDTH = 200;
+    private static final int BTN_HEIGHT = 50;
+    private static final String PLACEHOLDER = "name...";
+    private static final String PLACEHOLDER2 = "room code...";
+    
     public GoJoinRoom (GoMainFrame parent) {
         this.parent = parent;
-        this.setLayout(new FlowLayout());
+        this.setLayout(null);
         this.setSize(new Dimension(GoMainFrame.FRAME_WIDTH, GoMainFrame.FRAME_HEIGHT));
         this.setPreferredSize(new Dimension(GoMainFrame.FRAME_WIDTH, GoMainFrame.FRAME_HEIGHT));
+        this.setBackground(GoMainFrame.COLOR_4);
         
-        btnBack = new JButton();
-        btnBack.setText("< BACK");
-        btnBack.addActionListener(e -> {
-            parent.changeSceneTo("multiOnMenu");
+        btnBack = new ControlButton(
+                "<",
+                new Font("Arial", Font.BOLD, 42),
+                0,
+                0,
+                80,
+                110
+        );
+        btnBack.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                parent.changeSceneTo("multiOnMenu");
+            }
         });
         this.add(btnBack);
         
-        lblFirstName = new JLabel();
-        lblFirstName.setText("Player name: ");
+        lblTitle = new JLabel("Join Room");
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 48));
+        lblTitle.setForeground(GoMainFrame.COLOR_2);
+        lblTitle.setBackground(GoMainFrame.COLOR_3);
+        lblTitle.setBounds(0, 0, getWidth(), 110);
+        lblTitle.setOpaque(true);
+        lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
+        lblTitle.setVerticalAlignment(SwingConstants.CENTER);
+        this.add(lblTitle);
+        
+        lblFirstName = new JLabel("Your Name");
+        lblFirstName.setFont(new Font("Arial", Font.BOLD, 24));
+        lblFirstName.setForeground(GoMainFrame.COLOR_2);
+        lblFirstName.setBounds(centerX(getWidth(), 200), 150, 200, 50);
+        lblFirstName.setHorizontalAlignment(SwingConstants.CENTER);
+        lblFirstName.setVerticalAlignment(SwingConstants.CENTER);
         this.add(lblFirstName);
         
         txtFirstName = new JTextField();
-        txtFirstName.setPreferredSize(new Dimension(100, 30));
+        txtFirstName.setFont(new Font("Arial", Font.BOLD, 24));
+        txtFirstName.setText(PLACEHOLDER);
+        txtFirstName.setForeground(Color.GRAY);
+        txtFirstName.setBackground(GoMainFrame.COLOR_3);
+        txtFirstName.setBounds(centerX(getWidth(), 175), 200, 175, 40);
+        txtFirstName.setBorder(BorderFactory.createLineBorder(GoMainFrame.COLOR_2, 3));
+        txtFirstName.setCaretColor(Color.WHITE);
+        txtFirstName.setHorizontalAlignment(SwingConstants.CENTER);
+        txtFirstName.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (txtFirstName.getText().isEmpty()) {
+                    txtFirstName.setText(PLACEHOLDER);
+                    txtFirstName.setForeground(Color.GRAY);
+                }
+            }
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (txtFirstName.getText().equals(PLACEHOLDER)) {
+                    txtFirstName.setText("");
+                    txtFirstName.setForeground(Color.WHITE);
+                }
+            }
+        });
         this.add(txtFirstName);
         
-        lblRoomCode = new JLabel();
-        lblRoomCode.setText("Room Code: ");
+        lblRoomCode = new JLabel("Room Code");
+        lblRoomCode.setFont(new Font("Arial", Font.BOLD, 24));
+        lblRoomCode.setForeground(GoMainFrame.COLOR_2);
+        lblRoomCode.setBounds(centerX(getWidth(), 200), 270, 200, 50);
+        lblRoomCode.setHorizontalAlignment(SwingConstants.CENTER);
+        lblRoomCode.setVerticalAlignment(SwingConstants.CENTER);
         this.add(lblRoomCode);
         
         txtRoomCode = new JTextField();
-        txtRoomCode.setPreferredSize(new Dimension(100, 30));
+        txtRoomCode.setFont(new Font("Arial", Font.BOLD, 24));
+        txtRoomCode.setText(PLACEHOLDER2);
+        txtRoomCode.setForeground(Color.GRAY);
+        txtRoomCode.setBackground(GoMainFrame.COLOR_3);
+        txtRoomCode.setBounds(centerX(getWidth(), 250), 320, 250, 40);
+        txtRoomCode.setBorder(BorderFactory.createLineBorder(GoMainFrame.COLOR_2, 3));
+        txtRoomCode.setCaretColor(Color.WHITE);
+        txtRoomCode.setHorizontalAlignment(SwingConstants.CENTER);
+        txtRoomCode.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (txtRoomCode.getText().isEmpty()) {
+                    txtRoomCode.setText(PLACEHOLDER2);
+                    txtRoomCode.setForeground(Color.GRAY);
+                }
+            }
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (txtRoomCode.getText().equals(PLACEHOLDER2)) {
+                    txtRoomCode.setText("");
+                    txtRoomCode.setForeground(Color.WHITE);
+                }
+            }
+        });
         this.add(txtRoomCode);
         
         lblStatus = new JLabel();
+        lblStatus.setFont(new Font("Arial", Font.BOLD, 16));
+        lblStatus.setBounds(0, 410, getWidth(), 30);
+        lblStatus.setForeground(Color.WHITE);
+        lblStatus.setBackground(GoMainFrame.COLOR_3);
+        lblStatus.setText("Name must have 3-7 characters!");
+        lblStatus.setHorizontalAlignment(SwingConstants.CENTER);
+        lblStatus.setVerticalAlignment(SwingConstants.CENTER);
+        lblStatus.setOpaque(true);
         this.add(lblStatus);
         
-        btnJoin = new JButton();
-        btnJoin.setText("Join Room!");
-        btnJoin.addActionListener(e -> {
-            if (!validateForm()) return;
-            
-            txtFirstName.setEditable(false);
-            txtRoomCode.setEditable(false);
-            btnJoin.setEnabled(false);
-            
-            new Thread(() -> {
-                String IP = txtRoomCode.getText();
-                roomInfoClient = new RoomInfoClient(IP, GoMainFrame.ROOM_INFO_SERVER_PORT);
-                RoomModel roomModel= roomInfoClient.getRoomModel();
-                roomInfoClient.close();
-                
-                int response = JOptionPane.showConfirmDialog(parent, roomModel.toString(), "Room found!", JOptionPane.YES_NO_OPTION);
-                if (response == JOptionPane.YES_OPTION) {
-                    String clientName = txtFirstName.getText();
-                    GameSocket gameSocket = new GameSocket(IP, GoMainFrame.GAME_SERVER_PORT);
-                    gameSocket.send(clientName);
-                    {
-                        BoardSize boardSize = roomModel.getBoardSize();
-                        
-                        Player serverPlayerType = roomModel.getPlayerType();
-                        Player playerType = serverPlayerType.isBlack() ? Player.WHITE : Player.BLACK;
-                        
-                        String firstName, secondName;
-                        String serverName = roomModel.getRoomOwnerName();
-                        if (playerType.isBlack()) {
-                            firstName = clientName;
-                            secondName = serverName;
-                        } else {
-                            firstName = serverName;
-                            secondName = clientName;
+        btnJoin = new MaterialButton(
+                "Join Room!",
+                new Font("Arial", Font.BOLD, 20),
+                centerX(getWidth(), BTN_WIDTH),
+                480,
+                BTN_WIDTH,
+                BTN_HEIGHT
+        );
+        btnJoin.addMouseListener(new MouseAdapter() {
+            @Override            
+            public void mouseClicked(MouseEvent e) {
+                if (!validateForm()) return;
+
+                txtFirstName.setEditable(false);
+                txtRoomCode.setEditable(false);
+                btnJoin.setEnabled(false);
+
+                new Thread(() -> {
+                    String IP = txtRoomCode.getText();
+                    roomInfoClient = new RoomInfoClient(IP, GoMainFrame.ROOM_INFO_SERVER_PORT);
+                    RoomModel roomModel = roomInfoClient.getRoomModel();
+                    roomInfoClient.close();
+
+                    int response = JOptionPane.showConfirmDialog(parent, roomModel.toString(), "Room found!", JOptionPane.YES_NO_OPTION);
+                    if (response == JOptionPane.YES_OPTION) {
+                        String clientName = txtFirstName.getText();
+                        GameSocket gameSocket = new GameSocket(IP, GoMainFrame.GAME_SERVER_PORT);
+                        gameSocket.send(clientName);
+                        {
+                            BoardSize boardSize = roomModel.getBoardSize();
+
+                            Player serverPlayerType = roomModel.getPlayerType();
+                            Player playerType = serverPlayerType.isBlack() ? Player.WHITE : Player.BLACK;
+
+                            String firstName, secondName;
+                            String serverName = roomModel.getRoomOwnerName();
+                            if (playerType.isBlack()) {
+                                firstName = clientName;
+                                secondName = serverName;
+                            } else {
+                                firstName = serverName;
+                                secondName = clientName;
+                            }
+
+                            parent.removeComponent("joinRoom");
+                            parent.addComponent("multiOnPanel", new GoMultiOnPanel(
+                                    parent,
+                                    playerType,
+                                    firstName,
+                                    secondName,
+                                    boardSize,
+                                    gameSocket
+                            ));
+                            parent.changeSceneTo("multiOnPanel");
                         }
-                        
-                        parent.removeComponent("joinRoom");
-                        parent.addComponent("multiOnPanel", new GoMultiOnPanel(
-                                parent,
-                                playerType,
-                                firstName,
-                                secondName,
-                                boardSize,
-                                gameSocket
-                        ));
-                        parent.changeSceneTo("multiOnPanel");
                     }
-                }
-                txtFirstName.setEditable(true);
-                txtRoomCode.setEditable(true);
-                btnJoin.setEnabled(true);
-            }).start();
+                    txtFirstName.setEditable(true);
+                    txtRoomCode.setEditable(true);
+                    btnJoin.setEnabled(true);
+                }).start();
+            }
         });
         this.add(btnJoin);
     }
     
     private boolean validateForm() {
         int firstLength = txtFirstName.getText().length();
-        if ( !(3 <= firstLength && firstLength <= 8) ) {
-            lblStatus.setText("Name must be between 3 to 8 characters!");
+        if ( !(3 <= firstLength && firstLength <= 8) || txtFirstName.getText().equals(PLACEHOLDER) ) {
+            lblStatus.setBackground(Color.RED);
+            lblStatus.setText("Name must have 3-7 characters!");
             return false;
         }
-        if ( txtRoomCode.getText().length() == 0 ) {
+        if ( txtRoomCode.getText().length() == 0 || txtRoomCode.getText().equals(PLACEHOLDER2) ) {
+            lblStatus.setBackground(Color.RED);
             lblStatus.setText("Please fill in the Room Code!");
             return false;
         }
         return true;
+    }
+    
+    private int centerX(int W, int w) {
+        return (W-w)/2;
     }
     
 }
