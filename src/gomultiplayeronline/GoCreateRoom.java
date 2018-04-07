@@ -77,7 +77,9 @@ public class GoCreateRoom extends JPanel {
         );
         btnBack.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
+                stopConnection();
+                stopWaitingAnimation();
                 parent.changeSceneTo("multiOnMenu");
             }
         });
@@ -186,8 +188,9 @@ public class GoCreateRoom extends JPanel {
         );
         lblBlackPlayer.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                rdBlack.setSelected(true);
+            public void mousePressed(MouseEvent e) {
+                if (!waiting)
+                    rdBlack.setSelected(true);
             }
         });
         this.add(lblBlackPlayer);
@@ -220,8 +223,9 @@ public class GoCreateRoom extends JPanel {
         );
         lblWhitePlayer.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                rdWhite.setSelected(true);
+            public void mousePressed(MouseEvent e) {
+                if (!waiting)
+                    rdWhite.setSelected(true);
             }
         });
         this.add(lblWhitePlayer);
@@ -303,71 +307,101 @@ public class GoCreateRoom extends JPanel {
         );
         btnCreate.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                if (waiting) return;
-                if (!validateForm()) return;
+            public void mouseExited(MouseEvent e) {
+                if (waiting) {
+                    btnCreate.setBackground(Color.decode("#5E170C"));
+                    btnCreate.setBorder(BorderFactory.createLineBorder(Color.decode("#DC000E"), 4));
+                } else {
+                    btnCreate.setBorder(BorderFactory.createLineBorder(GoMainFrame.COLOR_2, 4));
+                }
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (waiting) {
+                    btnCreate.setBackground(Color.decode("#DC000E"));
+                    btnCreate.setBorder(BorderFactory.createLineBorder(Color.decode("#DC000E"), 4));
+                } else {
+                    btnCreate.setBorder(BorderFactory.createLineBorder(GoMainFrame.COLOR_2, 4));
+                }
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (waiting) {
+                    setRadioButtonsEnabled(true);
+                    waiting = false;
+                    stopConnection();
+                    txtPlayerName.setEnabled(true);
+                    btnCreate.setText("Create Room!");
+                    btnCreate.setBackground(GoMainFrame.COLOR_2);
+                    btnCreate.setBorder(BorderFactory.createLineBorder(GoMainFrame.COLOR_2, 4));
+                    stopWaitingAnimation();
+                    promptStatus(GoMainFrame.COLOR_3, "Name must have 3-7 characters!");
+                } else if (!waiting) {
+                    if (!validateForm()) return;
 
-                final BoardSize boardSize;
-                if (rdNineSize.isSelected()) boardSize = BoardSize.SMALL;
-                else if (rdThirteenSize.isSelected()) boardSize = BoardSize.MEDIUM;
-                else boardSize = BoardSize.LARGE;
+                    waiting = true;
+                    setRadioButtonsEnabled(false);
+                    txtPlayerName.setEnabled(false);
+                    startWaitingAnimation();
+                    btnCreate.setText("Stop Waiting");
+                    btnCreate.setBackground(Color.decode("#DC000E"));
+                    btnCreate.setBorder(BorderFactory.createLineBorder(Color.decode("#DC000E"), 4));
+                    
+                    final BoardSize boardSize;
+                    if (rdNineSize.isSelected()) boardSize = BoardSize.SMALL;
+                    else if (rdThirteenSize.isSelected()) boardSize = BoardSize.MEDIUM;
+                    else boardSize = BoardSize.LARGE;
 
-                final Player playerType;
-                if (rdBlack.isSelected()) playerType = Player.BLACK;
-                else playerType = Player.WHITE;
+                    final Player playerType;
+                    if (rdBlack.isSelected()) playerType = Player.BLACK;
+                    else playerType = Player.WHITE;
 
-                RoomModel roomModel = new RoomModel(
-                        txtPlayerName.getText(), 
-                        boardSize, 
-                        playerType
-                );
+                    RoomModel roomModel = new RoomModel(
+                            txtPlayerName.getText(), 
+                            boardSize, 
+                            playerType
+                    );
 
-                btnCreate.setEnabled(false);
-                txtPlayerName.setEnabled(false);
-                startWaitingAnimation();
-                
-                roomInfoServer = new RoomInfoServer(roomModel);
-                roomInfoServer.startServer();
-                waiting = true;
-                
-                gameServer = new GameServer();
-                new Thread(() -> {
-                    Socket socket = null;
-                    if ( (socket = gameServer.waitForConnection()) != null ) {
-                        roomInfoServer.stopServer();
-                        GameSocket gameSocket = new GameSocket(socket);
-                        String serverName = txtPlayerName.getText();
-                        {
-                            String firstName, secondName;
-                            String clientName = (String) gameSocket.receive();
-                            if (playerType.isBlack()) {
-                                firstName = serverName;
-                                secondName = clientName;
-                            } else {
-                                firstName = clientName;
-                                secondName = serverName;
+                    roomInfoServer = new RoomInfoServer(roomModel);
+                    roomInfoServer.startServer();
+
+                    gameServer = new GameServer();
+                    new Thread(() -> {
+                        Socket socket = null;
+                        if ( (socket = gameServer.waitForConnection()) != null ) {
+                            roomInfoServer.stopServer();
+                            GameSocket gameSocket = new GameSocket(socket);
+                            String serverName = txtPlayerName.getText();
+                            {
+                                String firstName, secondName;
+                                String clientName = (String) gameSocket.receive();
+                                if (playerType.isBlack()) {
+                                    firstName = serverName;
+                                    secondName = clientName;
+                                } else {
+                                    firstName = clientName;
+                                    secondName = serverName;
+                                }
+                                waiting = false;
+                                parent.removeComponent("createRoom");
+                                parent.addComponent("multiOnPanel", new GoMultiOnPanel(
+                                        parent,
+                                        playerType,
+                                        firstName,
+                                        secondName,
+                                        boardSize,
+                                        gameSocket
+                                ));
+                                parent.changeSceneTo("multiOnPanel");
                             }
-                            stopWaitingAnimation();
+                        } else {
+                            promptStatus(Color.RED, "Connection failed!");
+                            txtPlayerName.setEnabled(true);
                             waiting = false;
-                            parent.removeComponent("createRoom");
-                            parent.addComponent("multiOnPanel", new GoMultiOnPanel(
-                                    parent,
-                                    playerType,
-                                    firstName,
-                                    secondName,
-                                    boardSize,
-                                    gameSocket
-                            ));
-                            parent.changeSceneTo("multiOnPanel");
                         }
-                    } else {
                         stopWaitingAnimation();
-                        promptStatus(Color.RED, "Connection failed!");
-                        btnCreate.setEnabled(false);
-                        txtPlayerName.setEnabled(false);
-                        waiting = false;
-                    }
-                }).start();
+                    }).start();
+                }
             }
         });
         this.add(btnCreate);
@@ -402,7 +436,7 @@ public class GoCreateRoom extends JPanel {
  
     private void startWaitingAnimation() {
         String initialWaitingStatus = "Waiting for other player";
-        promptStatus(Color.GREEN, initialWaitingStatus);
+        promptStatus(Color.decode("#1C9C81"), initialWaitingStatus);
         final int len = initialWaitingStatus.length();
         timer = new Timer(500, e -> {
             String waitingStatus = lblStatus.getText();
@@ -414,9 +448,32 @@ public class GoCreateRoom extends JPanel {
         timer.start();
     }
     private void stopWaitingAnimation() {
-        if (timer != null && timer.isRunning()) {
-            timer.stop();
-            timer = null;
+        try {
+            if (timer != null && timer.isRunning()) {
+                timer.stop();
+                timer = null;
+            }
+        } catch (Exception ex) {
+            System.out.println(ex);
         }
+    }
+    
+    private void stopConnection() {
+        if (roomInfoServer != null) {
+            roomInfoServer.stopServer();
+            roomInfoServer = null;
+        }
+        if (gameServer != null) {
+            gameServer.stopServer();
+            gameServer = null;
+        }
+    }
+    
+    private void setRadioButtonsEnabled(boolean bool) {
+        rdNineSize.setEnabled(bool);
+        rdThirteenSize.setEnabled(bool);
+        rdNineteenSize.setEnabled(bool);
+        rdBlack.setEnabled(bool);
+        rdWhite.setEnabled(bool);
     }
 }

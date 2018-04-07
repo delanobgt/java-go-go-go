@@ -29,4 +29,12 @@ public class GameServer {
             }
         }
     }
+    
+    public void stopServer() {
+        try {
+            server.close();
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+    }
 }

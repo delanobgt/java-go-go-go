@@ -5,6 +5,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import models.GoModel;
 
 public class SurrenderPanel extends JPanel {
     
@@ -12,22 +13,24 @@ public class SurrenderPanel extends JPanel {
     private JRadioButton rdMainMenu;
     private ButtonGroup buttonGroup;
     
-    public SurrenderPanel(String winName, String loseName) {
+    public SurrenderPanel(String firstName, String secondName, GoModel goModel) {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         
-        String status = String.format(
-                "%s won!",
-                winName
+        String blackName = String.format(
+                "<span style=\"font-size:16px;\">%s</span>",
+                firstName
         );
-        JLabel lblStatus = new JLabel(status);
+        String whiteName = String.format(
+                "<span style=\"font-size:16px;\">%s</span>",
+                secondName
+        );
+        String msg = String.format(
+                "<html>%s won because %s surrendered.</html>",
+                goModel.getWin().isBlack() ? blackName : whiteName,
+                !goModel.getWin().isBlack() ? blackName : whiteName
+        );
+        JLabel lblStatus = new JLabel(msg);
         this.add(lblStatus);
-        
-        String subStatus = String.format(
-                "because %s surrendered",
-                loseName
-        );
-        JLabel lblSubStatus = new JLabel(subStatus);
-        this.add(lblSubStatus);
         
         rdPlayAgain = new JRadioButton("Play Again");
         rdPlayAgain.setSelected(true);

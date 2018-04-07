@@ -40,7 +40,7 @@ public class GoMultiOnMenu extends JPanel {
         );
         btnBack.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 parent.changeSceneTo("mainMenu");
             }
         });
@@ -66,7 +66,7 @@ public class GoMultiOnMenu extends JPanel {
         );
         btnCreateRoom.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 parent.addComponent("createRoom", new GoCreateRoom(parent));
                 parent.changeSceneTo("createRoom");
             }
@@ -83,7 +83,7 @@ public class GoMultiOnMenu extends JPanel {
         );
         btnJoinRoom.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 parent.addComponent("joinRoom", new GoJoinRoom(parent));
             parent.changeSceneTo("joinRoom");
             }

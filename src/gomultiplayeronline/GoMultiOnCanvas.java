@@ -5,6 +5,7 @@ import java.awt.BasicStroke;
 import models.GoModel;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -243,7 +244,26 @@ public class GoMultiOnCanvas extends JPanel {
                 }
             }
         }
+        
+        if (parentContainer.isWaitingOpponent()) {
+            final int barHeight = 50;
+            g.setColor(new Color(255, 255, 255, 120));
+            g.fillRect(0, (getHeight()-barHeight)/2, getWidth(), barHeight);
+            g.setColor(Color.BLACK);
+            g.setFont(new Font("Arial", Font.BOLD, 24));
+            g.drawString(waitingStatus, 135, (getHeight()-barHeight)/2+35);
+            
+            waitingStatusCounter = (waitingStatusCounter+ANIMATION_DELAY)%350;
+            if (waitingStatusCounter == 0) {
+                waitingStatus += " .";
+                if (waitingStatus.length() > initialWaitingStatus.length()+(3*2))
+                    waitingStatus = initialWaitingStatus;
+            }
+        }
     }
+    private final String initialWaitingStatus = "Waiting for opponent";
+    private String waitingStatus = initialWaitingStatus;
+    private int waitingStatusCounter = 0;
     
     private void drawStoneShadow(Graphics2D g, int r, int c, int turn) {
         if (turn == 0) g.setColor(new Color(0, 0, 0, 150));

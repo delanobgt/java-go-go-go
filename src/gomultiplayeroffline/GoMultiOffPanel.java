@@ -114,7 +114,7 @@ public class GoMultiOffPanel extends JPanel {
                 goModel.toggleTurn();
                 updatePlayerStatus();
                 if (goModel.getPassCounter() >= 2) {
-                    if (goModel.getWhiteTotalScore() > goModel.getBlackTotalScore())
+                    if (goModel.getWhiteTotalScore() >= goModel.getBlackTotalScore())
                         goModel.winWhite();
                     else
                         goModel.winBlack();
@@ -151,8 +151,9 @@ public class GoMultiOffPanel extends JPanel {
                     goModel.surrenderedBy(goModel.getTurn());
                     
                     SurrenderPanel surrenderPanel = new SurrenderPanel(
-                            goModel.getWin().isBlack() ? "BLACK" : "WHITE",
-                            goModel.getWin().isBlack() ? "WHITE" : "BLACK"                
+                            firstName,
+                            secondName,
+                            goModel
                     );
                     
                     JOptionPane.showMessageDialog(parent, surrenderPanel);

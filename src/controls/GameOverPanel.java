@@ -16,34 +16,21 @@ public class GameOverPanel extends JPanel {
     public GameOverPanel(String firstName, String secondName, GoModel goModel) {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         
-        String winName, loseName;
-        if (goModel.getWin().isBlack()) {
-            winName = firstName;
-            loseName = secondName;
-        } else {
-            winName = secondName;
-            loseName = firstName;
-        }
+        double blackTotalScore = goModel.getBlackTotalScore();
+        double whiteTotalScore = goModel.getWhiteTotalScore();
         
-        double blackFinalScore = goModel.getBlackTotalScore();
-        double whiteFinalScore = goModel.getWhiteTotalScore();
-        
-        String status = String.format(
-                "%s won by %.1f points! (Total Points: %.1f)",
-                winName,
-                Math.abs(blackFinalScore-whiteFinalScore),
-                winName.equals(firstName) ? blackFinalScore : whiteFinalScore
-        );
-        JLabel lblStatus = new JLabel(status);
+        String msg = String.format(
+                    "<html>" +
+                    "<span style=\"font-size:16px;\">%s</span> won! <br>" +
+                    "%s (BLACK): %.1f points<br>" +
+                    "%s (WHITE): %.1f points (included +6.5)<br>" +
+                    "</html>",
+                    goModel.getWin().isBlack() ? firstName : secondName,
+                    firstName, blackTotalScore,
+                    secondName, whiteTotalScore
+            );
+        JLabel lblStatus = new JLabel(msg);
         this.add(lblStatus);
-            
-        String subStatus = String.format(
-                "%s's total points: %.1f",
-                loseName,
-                winName.equals(firstName) ? whiteFinalScore : blackFinalScore
-        );
-        JLabel lblSubStatus = new JLabel(subStatus);
-        this.add(lblSubStatus);
         
         rdPlayAgain = new JRadioButton("Play Again");
         rdPlayAgain.setSelected(true);

@@ -1,12 +1,11 @@
 package gomultiplayeronline;
 
 import controls.ControlButton;
-import controls.GameOverPanel;
 import controls.PersistentButton;
 import controls.PlayerPanel;
-import controls.SurrenderPanel;
 import enums.BoardSize;
 import enums.Player;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
@@ -29,6 +28,8 @@ public class GoMultiOnPanel extends JPanel {
     private GoMultiOnCanvas goMultiOffCanvas;
     private PlayerPanel firstPanel;
     private PlayerPanel secondPanel;
+    private JLabel passBtn;
+    private JLabel surrenderBtn;
     private JPanel controlPanel;
     private Player playerType;
     private GameSocket gameSocket;
@@ -111,7 +112,7 @@ public class GoMultiOnPanel extends JPanel {
         });
         controlPanel.add(territoryBtn);
         
-        JLabel passBtn = new ControlButton(
+        passBtn = new ControlButton(
                 "Pass",
                 new Font("Arial", Font.BOLD, 12),
                 2*BTN_SPACING+BTN_WIDTH, 
@@ -123,16 +124,29 @@ public class GoMultiOnPanel extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (!goModel.getTurn().equals(playerType)) {
-                    JOptionPane.showMessageDialog(parent, "Not you turn yet!");
                     return;
                 }
                 gameSocket.send("PASS:"+goModel.getTurn().toString());
                 handlePassBtn();
             }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (waitingOpponent) {
+                    passBtn.setBackground(GoMainFrame.COLOR_3);
+                    passBtn.setForeground(Color.GRAY);
+                }
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (waitingOpponent) {
+                    passBtn.setBackground(GoMainFrame.COLOR_3);
+                    passBtn.setForeground(Color.GRAY);
+                }
+            }
         });
         controlPanel.add(passBtn);
         
-        JLabel surrenderBtn = new ControlButton(
+        surrenderBtn = new ControlButton(
                 "Surrender",
                 new Font("Arial", Font.BOLD, 12),
                 3*BTN_SPACING+2*BTN_WIDTH,
@@ -144,13 +158,26 @@ public class GoMultiOnPanel extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (!goModel.getTurn().equals(playerType)) {
-                    JOptionPane.showMessageDialog(parent, "Not you turn yet!");
                     return;
                 }
                 int response = JOptionPane.showConfirmDialog(parent, "Are you sure?", "Surrender", JOptionPane.YES_NO_OPTION);
                 if (response == JOptionPane.YES_OPTION) {
                     gameSocket.send("SURRENDER:"+goModel.getTurn().toString());
                     handleSurrenderBtn();
+                }
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (waitingOpponent) {
+                    surrenderBtn.setBackground(GoMainFrame.COLOR_3);
+                    surrenderBtn.setForeground(Color.GRAY);
+                }
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (waitingOpponent) {
+                    surrenderBtn.setBackground(GoMainFrame.COLOR_3);
+                    surrenderBtn.setForeground(Color.GRAY);
                 }
             }
         });
@@ -165,12 +192,24 @@ public class GoMultiOnPanel extends JPanel {
         goModel.toggleTurn();
         updatePlayerStatus();
         if (goModel.getPassCounter() >= 2) {
-            if (goModel.getWhiteTotalScore() > goModel.getBlackTotalScore())
+            double blackTotalScore = goModel.getBlackTotalScore();
+            double whiteTotalScore = goModel.getWhiteTotalScore();
+            if (whiteTotalScore > blackTotalScore) {
                 goModel.winWhite();
-            else
+            } else {
                 goModel.winBlack();
-            
-            JOptionPane.showMessageDialog(parent, "Game ended with 2 passes!");
+            }
+            String msg = String.format(
+                    "<html>" +
+                    "You %s<br>" +
+                    "%s (BLACK): %.1f points<br>" +
+                    "%s (WHITE): %.1f points (included +6.5)<br>" +
+                    "</html>",
+                    goModel.getWin().equals(playerType) ? "won" : "lost",
+                    firstName, blackTotalScore,
+                    secondName, whiteTotalScore
+            );
+            JOptionPane.showMessageDialog(parent, msg);
             parent.changeSceneTo("mainMenu");
         }
     }
@@ -178,12 +217,20 @@ public class GoMultiOnPanel extends JPanel {
     private void handleSurrenderBtn() {
         goModel.surrenderedBy(goModel.getTurn());
         
-        SurrenderPanel surrenderPanel = new SurrenderPanel(
-                goModel.getWin().isBlack() ? "BLACK" : "WHITE",
-                goModel.getWin().isBlack() ? "WHITE" : "BLACK"                
+        String blackName = String.format(
+                "<span style=\"font-size:16px;\">%s</span>",
+                firstName
         );
-
-        JOptionPane.showMessageDialog(parent, "lolol");
+        String whiteName = String.format(
+                "<span style=\"font-size:16px;\">%s</span>",
+                secondName
+        );
+        String msg = String.format(
+                "<html>You %s because %s surrendered.</html>",
+                goModel.getWin().equals(playerType) ? "won" : "lost",
+                !goModel.getWin().isBlack() ? blackName : whiteName
+        );
+        JOptionPane.showMessageDialog(parent, msg);
         
         parent.changeSceneTo("mainMenu");
     }
@@ -258,11 +305,19 @@ public class GoMultiOnPanel extends JPanel {
                 } else {
                     System.out.println("something else!!");
                 }
+                passBtn.setBackground(GoMainFrame.COLOR_3);
+                passBtn.setForeground(Color.WHITE);
+                surrenderBtn.setBackground(GoMainFrame.COLOR_3);
+                surrenderBtn.setForeground(Color.WHITE);
             }
         }).start();
     }
     
     public void sendRequest(String request) {
+        passBtn.setBackground(GoMainFrame.COLOR_3);
+        passBtn.setForeground(Color.GRAY);
+        surrenderBtn.setBackground(GoMainFrame.COLOR_3);
+        surrenderBtn.setForeground(Color.GRAY);
         gameSocket.send(request);
     }
 }

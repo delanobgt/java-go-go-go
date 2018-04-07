@@ -61,7 +61,7 @@ public class GoMultiOffMenu extends JPanel {
         );
         btnBack.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 parent.changeSceneTo("mainMenu");
             }
         });
@@ -254,7 +254,7 @@ public class GoMultiOffMenu extends JPanel {
         );
         btnStart.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 BoardSize boardSize = null;
                 if (rdNineSize.isSelected()) boardSize = BoardSize.SMALL;
                 else if (rdThirteenSize.isSelected()) boardSize = BoardSize.MEDIUM;
