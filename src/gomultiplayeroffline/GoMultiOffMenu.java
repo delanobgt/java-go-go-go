@@ -255,13 +255,13 @@ public class GoMultiOffMenu extends JPanel {
         btnStart.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                if (!validateForm()) return;
+
                 BoardSize boardSize = null;
                 if (rdNineSize.isSelected()) boardSize = BoardSize.SMALL;
                 else if (rdThirteenSize.isSelected()) boardSize = BoardSize.MEDIUM;
                 else boardSize = BoardSize.LARGE;
-
-                if (!validateForm()) return;
-
+                
                 parent.addComponent("multiOffPanel", new GoMultiOffPanel(parent, txtFirstName.getText(), txtSecondName.getText(), boardSize));
                 parent.changeSceneTo("multiOffPanel");
             }

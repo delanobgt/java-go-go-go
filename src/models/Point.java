@@ -32,5 +32,10 @@ public class Point {
         hash = 17 * hash * this.r + this.c;
         return hash;
     }
+    
+    @Override
+    public String toString() {
+        return "("+r+","+c+")";
+    }
 }
 

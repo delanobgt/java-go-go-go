@@ -151,12 +151,6 @@ public class GoModel implements Serializable {
             else freqOfPoint.put(p, freqOfPoint.get(p)+1);
             
             // crazy chain of important if statements
-//            System.out.println(freqOfPoint);
-//            System.out.println(freqOfPoint.size());
-//            System.out.println(p.r()+" "+p.c());
-//            System.out.println(freqOfPoint.get(p));
-//            System.out.println("");System.out.println("");
-//            System.out.println("");System.out.println("");
             if ( ((p.r()==0 && p.c()==0) || (p.r()==0 && p.c()==boardSize-1)|| 
                   (p.r()==boardSize-1 && p.c()==0) || (p.r()==boardSize-1 && p.c()==boardSize-1)) &&
                   freqOfPoint.get(p) > 1 ) {
@@ -295,5 +289,9 @@ public class GoModel implements Serializable {
                 board[r][c] = backupBoard[r][c];
             }
         }
+    }
+    
+    public ImmutableBoard getImmutableBoard() {
+        return new ImmutableBoard(board);
     }
 }

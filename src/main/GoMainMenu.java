@@ -2,6 +2,7 @@ package main;
 
 import gomultiplayeroffline.GoMultiOffMenu;
 import gomultiplayeronline.GoMultiOnMenu;
+import gosingle.GoSingleMenu;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JButton;
@@ -22,6 +23,7 @@ public class GoMainMenu extends JPanel {
         singleBtn = new JButton();
         singleBtn.setText("Singleplayer");
         singleBtn.addActionListener(e -> {
+            parent.addComponent("singleMenu", new GoSingleMenu(parent));
             parent.changeSceneTo("singleMenu");
         });
         

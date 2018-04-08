@@ -1,9 +1,12 @@
-package gomultiplayeronline;
+package gosingle;
 
 import controls.ControlButton;
+import controls.GameOverPanel;
 import controls.PersistentButton;
 import controls.PlayerPanel;
+import controls.SurrenderPanel;
 import enums.BoardSize;
+import enums.Difficulty;
 import enums.Player;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,46 +20,48 @@ import main.GoMainFrame;
 import models.GoModel;
 import models.Point;
 
-public class GoMultiOnPanel extends JPanel {
+public class GoSinglePanel extends JPanel {
     
     public static final int CONTROL_PANEL_HEIGHT = 40;
     GoMainFrame parent;
-    private String firstName;
-    private String secondName;
-    private BoardSize boardSize;
     private GoModel goModel;
-    private GoMultiOnCanvas goMultiOnCanvas;
+    private GoSingleCanvas goSingleCanvas;
     private PlayerPanel firstPanel;
     private PlayerPanel secondPanel;
-    private JLabel passBtn;
-    private JLabel surrenderBtn;
     private JPanel controlPanel;
-    private Player playerType;
-    private GameSocket gameSocket;
-    private volatile boolean waitingOpponent;
+    private JLabel surrenderBtn;
+    private JLabel passBtn;
+    private Difficulty difficulty;
+    private final String playerName;
+    private final String firstName, secondName;
+    private final Player playerType;
+    private final BoardSize boardSize;
+    private volatile boolean waitingComputer;
     
-    public GoMultiOnPanel(GoMainFrame parent, Player playerType, String firstName, String secondName, BoardSize boardSize, GameSocket gameSocket) {
+    public GoSinglePanel(GoMainFrame parent, String playerName, Player playerType, BoardSize boardSize, Difficulty difficulty) {
         this.parent = parent;
-        this.firstName = firstName;
-        this.secondName = secondName;
-        this.boardSize = boardSize;
-        this.playerType = playerType;
-        waitingOpponent = playerType.isBlack() ? false : true;
         this.goModel = new GoModel(boardSize);
-        this.gameSocket = gameSocket;
+        this.difficulty = difficulty;
+        this.boardSize = boardSize;
         this.setLayout(null);
         this.setSize(new Dimension(GoMainFrame.FRAME_WIDTH, GoMainFrame.FRAME_HEIGHT));
         this.setPreferredSize(new Dimension(GoMainFrame.FRAME_WIDTH, GoMainFrame.FRAME_HEIGHT));
+        this.waitingComputer = playerType.equals(goModel.getTurn()) ? false : true;
         
-        goMultiOnCanvas = new GoMultiOnCanvas(goModel, this);
-        this.add(goMultiOnCanvas);
+        this.playerType = playerType;
+        this.playerName = playerName;
+        this.firstName = playerType.isBlack() ? playerName : "Computer";
+        this.secondName = playerType.isWhite() ? playerName : "Computer";
+        
+        goSingleCanvas = new GoSingleCanvas(goModel, this);
+        this.add(goSingleCanvas);
         
         // first player panel
         firstPanel = new PlayerPanel(
                 firstName,
                 0,
                 0,
-                GoMainFrame.FRAME_WIDTH-goMultiOnCanvas.getWidth(), 
+                GoMainFrame.FRAME_WIDTH-goSingleCanvas.getWidth(), 
                 GoMainFrame.FRAME_HEIGHT/2,
                 Player.BLACK
         );
@@ -68,7 +73,7 @@ public class GoMultiOnPanel extends JPanel {
                 secondName,
                 0,
                 GoMainFrame.FRAME_HEIGHT/2, 
-                GoMainFrame.FRAME_WIDTH-goMultiOnCanvas.getWidth(), 
+                GoMainFrame.FRAME_WIDTH-goSingleCanvas.getWidth(), 
                 GoMainFrame.FRAME_HEIGHT/2,
                 Player.WHITE
         );
@@ -79,9 +84,9 @@ public class GoMultiOnPanel extends JPanel {
         controlPanel = new JPanel();
         controlPanel.setLayout(null);
         controlPanel.setBounds(firstPanel.getWidth(),
-                goMultiOnCanvas.getHeight(), 
-                goMultiOnCanvas.getWidth(),
-                GoMainFrame.FRAME_HEIGHT-goMultiOnCanvas.getHeight()
+                goSingleCanvas.getHeight(), 
+                goSingleCanvas.getWidth(),
+                GoMainFrame.FRAME_HEIGHT-goSingleCanvas.getHeight()
         );
         controlPanel.setBackground(GoMainFrame.COLOR_4);
         this.add(controlPanel);
@@ -104,8 +109,8 @@ public class GoMultiOnPanel extends JPanel {
             public void mousePressed(MouseEvent e) {
                 territoryBtn.togglePersistent();
                 goModel.scanTerritory();
-                goMultiOnCanvas.toggleTerritoryBeingShown();
-                if (goMultiOnCanvas.isTerritoryBeingShown())
+                goSingleCanvas.toggleTerritoryBeingShown();
+                if (goSingleCanvas.isTerritoryBeingShown())
                     territoryBtn.setBackground(GoMainFrame.COLOR_2);
             }
         });
@@ -122,22 +127,19 @@ public class GoMultiOnPanel extends JPanel {
         passBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (!goModel.getTurn().equals(playerType)) {
-                    return;
-                }
-                gameSocket.send("PASS:"+goModel.getTurn().toString());
+                if (waitingComputer) return;
                 handlePassBtn();
             }
             @Override
             public void mouseExited(MouseEvent e) {
-                if (waitingOpponent) {
+                if (waitingComputer) {
                     passBtn.setBackground(GoMainFrame.COLOR_3);
                     passBtn.setForeground(Color.GRAY);
                 }
             }
             @Override
             public void mouseEntered(MouseEvent e) {
-                if (waitingOpponent) {
+                if (waitingComputer) {
                     passBtn.setBackground(GoMainFrame.COLOR_3);
                     passBtn.setForeground(Color.GRAY);
                 }
@@ -156,25 +158,38 @@ public class GoMultiOnPanel extends JPanel {
         surrenderBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (!goModel.getTurn().equals(playerType)) {
-                    return;
-                }
+                if (waitingComputer) return;
                 int response = JOptionPane.showConfirmDialog(parent, "Are you sure?", "Surrender", JOptionPane.YES_NO_OPTION);
                 if (response == JOptionPane.YES_OPTION) {
-                    gameSocket.send("SURRENDER:"+goModel.getTurn().toString());
-                    handleSurrenderBtn();
+                    goModel.surrenderedBy(goModel.getTurn());
+                    
+                    SurrenderPanel surrenderPanel = new SurrenderPanel(
+                            firstName,
+                            secondName,
+                            goModel
+                    );
+                    
+                    JOptionPane.showMessageDialog(parent, surrenderPanel);
+                    
+                    if (surrenderPanel.isPlayAgainSelected()) {
+                        parent.addComponent("singlePanel", new GoSinglePanel(parent, playerName, playerType, boardSize, difficulty));
+                        parent.changeSceneTo("singlePanel");
+                    } else {
+                        parent.removeComponent("singlePanel");
+                        parent.changeSceneTo("mainMenu");
+                    }
                 }
             }
             @Override
             public void mouseExited(MouseEvent e) {
-                if (waitingOpponent) {
+                if (waitingComputer) {
                     surrenderBtn.setBackground(GoMainFrame.COLOR_3);
                     surrenderBtn.setForeground(Color.GRAY);
                 }
             }
             @Override
             public void mouseEntered(MouseEvent e) {
-                if (waitingOpponent) {
+                if (waitingComputer) {
                     surrenderBtn.setBackground(GoMainFrame.COLOR_3);
                     surrenderBtn.setForeground(Color.GRAY);
                 }
@@ -182,62 +197,32 @@ public class GoMultiOnPanel extends JPanel {
         });
         controlPanel.add(surrenderBtn);
         
-        if (!playerType.equals(goModel.getTurn())) {
-            passBtn.setBackground(GoMainFrame.COLOR_3);
-            passBtn.setForeground(Color.GRAY);
-            surrenderBtn.setBackground(GoMainFrame.COLOR_3);
-            surrenderBtn.setForeground(Color.GRAY);
-        }
         updatePlayerStatus();
-        startListeningSocket();
+        goSingleCanvas.startBotThread();
     }
     
-    private void handlePassBtn() {
+    public void handlePassBtn() {
         goModel.addPassCounter();
         goModel.toggleTurn();
         updatePlayerStatus();
         if (goModel.getPassCounter() >= 2) {
-            double blackTotalScore = goModel.getBlackTotalScore();
-            double whiteTotalScore = goModel.getWhiteTotalScore();
-            if (whiteTotalScore > blackTotalScore) {
+            if (goModel.getWhiteTotalScore() >= goModel.getBlackTotalScore())
                 goModel.winWhite();
-            } else {
+            else
                 goModel.winBlack();
+            
+            GameOverPanel gameOverPanel = new GameOverPanel(firstName, secondName, goModel);
+
+            JOptionPane.showMessageDialog(parent, gameOverPanel);
+
+            if (gameOverPanel.isPlayAgainSelected()) {
+                parent.addComponent("singlePanel", new GoSinglePanel(parent, playerName, playerType, boardSize, difficulty));
+                parent.changeSceneTo("singlePanel");
+            } else {
+                parent.removeComponent("singlePanel");
+                parent.changeSceneTo("mainMenu");
             }
-            String msg = String.format(
-                    "<html>" +
-                    "You %s<br>" +
-                    "%s (BLACK): %.1f points<br>" +
-                    "%s (WHITE): %.1f points (included +6.5)<br>" +
-                    "</html>",
-                    goModel.getWin().equals(playerType) ? "won" : "lost",
-                    firstName, blackTotalScore,
-                    secondName, whiteTotalScore
-            );
-            JOptionPane.showMessageDialog(parent, msg);
-            parent.changeSceneTo("mainMenu");
         }
-    }
-    
-    private void handleSurrenderBtn() {
-        goModel.surrenderedBy(goModel.getTurn());
-        
-        String blackName = String.format(
-                "<span style=\"font-size:16px;\">%s</span>",
-                firstName
-        );
-        String whiteName = String.format(
-                "<span style=\"font-size:16px;\">%s</span>",
-                secondName
-        );
-        String msg = String.format(
-                "<html>You %s because %s surrendered.</html>",
-                goModel.getWin().equals(playerType) ? "won" : "lost",
-                !goModel.getWin().isBlack() ? blackName : whiteName
-        );
-        JOptionPane.showMessageDialog(parent, msg);
-        
-        parent.changeSceneTo("mainMenu");
     }
     
     public void updatePlayerStatus() {
@@ -282,47 +267,29 @@ public class GoMultiOnPanel extends JPanel {
         firstPanel.changeCapturedText("Captured: ", "white-"+goModel.getBlackCapturedScore());
         secondPanel.changeCapturedText("Captured: ", "white-"+goModel.getWhiteCapturedScore());
     }
+    
+    public boolean isWaitingComputer() {
+        return waitingComputer;
+    }
+    public void setWaitingComputer(boolean waitingComputer) {
+        this.waitingComputer = waitingComputer;
+    }
 
-    public boolean isWaitingOpponent() {
-        return waitingOpponent;
-    }
-    public void toggleWaitingOpponent() {
-        waitingOpponent = !waitingOpponent;
+    public Difficulty getDifficulty() {
+        return difficulty;
     }
     
-    private void startListeningSocket() {
-        new Thread(() -> {
-            System.out.println("start listening for request..");
-            while (true) {
-                String request = (String) gameSocket.receive();
-                String[] splitted = request.split(":");
-                String type = splitted[0];
-                if (type.equals("STONE")) {
-                    String[] coords = splitted[1].split(",");
-                    goMultiOnCanvas.handleUserClick(Integer.parseInt(coords[0]), Integer.parseInt(coords[1]));
-                    toggleWaitingOpponent();
-                    if (waitingOpponent) System.out.println("anjing salah");
-                } else if (type.equals("SURRENDER")) {
-                    handleSurrenderBtn();
-                } else if (type.equals("PASS")) {
-                    toggleWaitingOpponent();
-                    handlePassBtn();
-                } else {
-                    System.out.println("something else!!");
-                }
-                passBtn.setBackground(GoMainFrame.COLOR_3);
-                passBtn.setForeground(Color.WHITE);
-                surrenderBtn.setBackground(GoMainFrame.COLOR_3);
-                surrenderBtn.setForeground(Color.WHITE);
-            }
-        }).start();
-    }
-    
-    public void sendRequest(String request) {
-        passBtn.setBackground(GoMainFrame.COLOR_3);
-        passBtn.setForeground(Color.GRAY);
-        surrenderBtn.setBackground(GoMainFrame.COLOR_3);
-        surrenderBtn.setForeground(Color.GRAY);
-        gameSocket.send(request);
+    public void setControlButtonsActivated(boolean bool) {
+        if (bool) {
+            passBtn.setBackground(GoMainFrame.COLOR_3);
+            passBtn.setForeground(Color.WHITE);
+            surrenderBtn.setBackground(GoMainFrame.COLOR_3);
+            surrenderBtn.setForeground(Color.WHITE);
+        } else {
+            passBtn.setBackground(GoMainFrame.COLOR_3);
+            passBtn.setForeground(Color.GRAY);
+            surrenderBtn.setBackground(GoMainFrame.COLOR_3);
+            surrenderBtn.setForeground(Color.GRAY);
+        }
     }
 }
