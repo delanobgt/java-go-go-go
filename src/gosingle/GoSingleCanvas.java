@@ -6,6 +6,7 @@ import java.awt.BasicStroke;
 import models.GoModel;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -308,7 +309,27 @@ public class GoSingleCanvas extends JPanel {
                 }
             }
         }
+        
+        // paint waiting banner
+        if (parentContainer.isWaitingComputer()) {
+            final int barHeight = 80;
+            g.setColor(new Color(30, 194, 163, 210));
+            g.fillRect(0, (getHeight()-barHeight)/2, getWidth(), barHeight);
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 36));
+            g.drawString(waitingComputer, 85, (getHeight()-barHeight)/2+55);
+            
+            waitingComputerCounter = (waitingComputerCounter+ANIMATION_DELAY)%350;
+            if (waitingComputerCounter == 0) {
+                waitingComputer += " .";
+                if (waitingComputer.length() > initialWaitingComputer.length()+(3*2))
+                    waitingComputer = initialWaitingComputer;
+            }
+        }
     }
+    private final String initialWaitingComputer = "Waiting for Computer";
+    private String waitingComputer = initialWaitingComputer;
+    private int waitingComputerCounter = 0;
     
     private void drawStoneShadow(Graphics2D g, int r, int c, int turn) {
         if (turn == 0) g.setColor(new Color(0, 0, 0, 150));

@@ -1,5 +1,6 @@
 package gosingle;
 
+import enums.BoardSize;
 import enums.Difficulty;
 import enums.Player;
 import enums.StoneType;
@@ -14,14 +15,26 @@ public class Bot {
     // BLACK is minimum, WHITE is maximum
     
     private static Map<String, Point> pointMemo;
+    private static Map<String, Integer> depthMemo = new HashMap<String, Integer>() {
+        {
+            put(BoardSize.SMALL.toString()+Difficulty.EASY.toString(), 1);
+            put(BoardSize.SMALL.toString()+Difficulty.MEDIUM.toString(), 2);
+            put(BoardSize.SMALL.toString()+Difficulty.HARD.toString(), 3);
+            
+            put(BoardSize.MEDIUM.toString()+Difficulty.EASY.toString(), 1);
+            put(BoardSize.MEDIUM.toString()+Difficulty.MEDIUM.toString(), 2);
+            put(BoardSize.MEDIUM.toString()+Difficulty.HARD.toString(), 3);
+            
+            put(BoardSize.LARGE.toString()+Difficulty.EASY.toString(), 1);
+            put(BoardSize.LARGE.toString()+Difficulty.MEDIUM.toString(), 1);
+            put(BoardSize.LARGE.toString()+Difficulty.HARD.toString(), 2);
+        }
+    };
     
     public static Point getNextMove(ImmutableBoard board, int passCount, int blackScore, int whiteScore, Player currentPlayer, Difficulty difficulty) {
         StoneType currentStone = currentPlayer.isBlack() ? StoneType.BLACK : StoneType.WHITE;
         
-        int depth;
-        if (difficulty.isEasy()) depth = 2;
-        else if (difficulty.isMedium()) depth = 3;
-        else depth = 4;
+        int depth = depthMemo.get( BoardSize.fromSize(board.getSize()) + difficulty.toString() );
         
         pointMemo = new HashMap<>();
         minimax(currentStone.isBlack() ? 0 : 1, board, passCount, blackScore, whiteScore, currentStone, depth);

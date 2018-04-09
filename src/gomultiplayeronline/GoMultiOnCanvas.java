@@ -245,13 +245,14 @@ public class GoMultiOnCanvas extends JPanel {
             }
         }
         
+        // paint waiting banner
         if (parentContainer.isWaitingOpponent()) {
-            final int barHeight = 50;
-            g.setColor(new Color(255, 255, 255, 120));
+            final int barHeight = 80;
+            g.setColor(new Color(1, 175, 184, 210));
             g.fillRect(0, (getHeight()-barHeight)/2, getWidth(), barHeight);
-            g.setColor(Color.BLACK);
-            g.setFont(new Font("Arial", Font.BOLD, 24));
-            g.drawString(waitingStatus, 135, (getHeight()-barHeight)/2+35);
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 36));
+            g.drawString(waitingStatus, 85, (getHeight()-barHeight)/2+55);
             
             waitingStatusCounter = (waitingStatusCounter+ANIMATION_DELAY)%350;
             if (waitingStatusCounter == 0) {
