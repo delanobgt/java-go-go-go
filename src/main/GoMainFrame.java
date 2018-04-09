@@ -43,7 +43,7 @@ public class GoMainFrame extends JFrame {
         this.add(mainPanel);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
-        this.setTitle("Go Mania!");
+        this.setTitle("Go Go Go!");
         this.pack();
         this.setLocationRelativeTo(null);
         
