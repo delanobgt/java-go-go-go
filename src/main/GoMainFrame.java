@@ -1,5 +1,6 @@
 package main;
 
+import menus.GoMainMenu;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -43,7 +44,7 @@ public class GoMainFrame extends JFrame {
         this.add(mainPanel);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
-        this.setTitle("Go Go Go!");
+        this.setTitle("Go UPH Go!");
         this.pack();
         this.setLocationRelativeTo(null);
         

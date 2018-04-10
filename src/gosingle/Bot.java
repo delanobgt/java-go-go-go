@@ -57,7 +57,6 @@ public class Bot {
         pointMemo.put(hash, null);
         
         List<Point> possiblePoints = getPossiblePoints(board);
-        System.out.printf("Depth: %d, Possibilities: %d\n", depth, possiblePoints.size());
         int result = minimax == 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
         Point resultPoint = null;
         for (Point p : possiblePoints) {

@@ -1,4 +1,4 @@
-package main;
+package menus;
 
 import controls.MaterialButton;
 import gomultiplayeroffline.GoMultiOffMenu;
@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import main.GoMainFrame;
 
 public class GoMainMenu extends JPanel {
     
@@ -22,6 +23,7 @@ public class GoMainMenu extends JPanel {
     JLabel howToPlayBtn;
     JLabel aboutBtn;
     JLabel footerLbl;
+    PrettyBackground prettyBackground;
     
     private static final int BTN_WIDTH = 220;
     private static final int BTN_HEIGHT = 50;
@@ -36,7 +38,7 @@ public class GoMainMenu extends JPanel {
                 "Singleplayer",
                 new Font("Arial", Font.BOLD, 20),
                 centerX(getWidth(), BTN_WIDTH),
-                220,
+                240,
                 BTN_WIDTH,
                 BTN_HEIGHT
         );
@@ -53,7 +55,7 @@ public class GoMainMenu extends JPanel {
                 "Multiplayer (Local)",
                 new Font("Arial", Font.BOLD, 20),
                 centerX(getWidth(), BTN_WIDTH),
-                305,
+                325,
                 BTN_WIDTH,
                 BTN_HEIGHT
         );
@@ -70,7 +72,7 @@ public class GoMainMenu extends JPanel {
                 "Multiplayer (LAN)",
                 new Font("Arial", Font.BOLD, 20),
                 centerX(getWidth(), BTN_WIDTH),
-                390,
+                410,
                 BTN_WIDTH,
                 BTN_HEIGHT
         );
@@ -88,7 +90,7 @@ public class GoMainMenu extends JPanel {
                 "How To Play",
                 new Font("Arial", Font.BOLD, 20),
                 centerX(getWidth(), BTN_WIDTH2)-(BTN_WIDTH2*3/5),
-                470,
+                490,
                 BTN_WIDTH2,
                 BTN_HEIGHT
         );
@@ -105,7 +107,7 @@ public class GoMainMenu extends JPanel {
                 "About",
                 new Font("Arial", Font.BOLD, 20),
                 centerX(getWidth(), BTN_WIDTH2)+(BTN_WIDTH2*3/5),
-                470,
+                490,
                 BTN_WIDTH2,
                 BTN_HEIGHT
         );
@@ -139,6 +141,9 @@ public class GoMainMenu extends JPanel {
         footerLbl.setHorizontalAlignment(SwingConstants.CENTER);
         footerLbl.setVerticalAlignment(SwingConstants.CENTER);
         this.add(footerLbl);
+        
+        prettyBackground = new PrettyBackground();
+        this.add(prettyBackground);
     }
     
     private int centerX(int W, int w) {
