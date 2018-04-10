@@ -14,9 +14,6 @@ public class RoomInfoServer {
     private RoomModel roomModel;
     
     public RoomInfoServer(RoomModel roomModel) {
-        try {
-            System.out.println(InetAddress.getLocalHost().getHostAddress());
-        } catch (Exception ex) {}
         this.roomModel = roomModel;
     }
     

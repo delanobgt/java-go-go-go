@@ -14,6 +14,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.InetAddress;
 import java.net.Socket;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -47,6 +48,10 @@ public class GoCreateRoom extends JPanel {
     
     JLabel lblPlayerName;
     JTextField txtPlayerName;
+    
+    JLabel lblRoomCodeBanner;
+    JLabel lblRoomCodeValue;
+    
     JLabel lblStatus;
     JLabel btnCreate;
  
@@ -99,7 +104,7 @@ public class GoCreateRoom extends JPanel {
         lblBoardSize.setText("Board Size");
         lblBoardSize.setFont(new Font("Arial", Font.BOLD, 24));
         lblBoardSize.setForeground(GoMainFrame.COLOR_2);
-        lblBoardSize.setBounds(centerX(getWidth(), 200), 130, 200, 50);
+        lblBoardSize.setBounds(centerX(getWidth(), 200), 110, 200, 50);
         lblBoardSize.setHorizontalAlignment(SwingConstants.CENTER);
         lblBoardSize.setVerticalAlignment(SwingConstants.CENTER);
         this.add(lblBoardSize);
@@ -110,7 +115,7 @@ public class GoCreateRoom extends JPanel {
         rdNineSize.setFont(new Font("Arial", Font.BOLD, 24));
         rdNineSize.setForeground(Color.WHITE);
         rdNineSize.setBackground(GoMainFrame.COLOR_3);
-        rdNineSize.setBounds(170, 190, 100, 50);
+        rdNineSize.setBounds(170, 170, 100, 50);
         rdNineSize.setHorizontalAlignment(SwingConstants.CENTER);
         rdNineSize.setVerticalAlignment(SwingConstants.CENTER);
         rdNineSize.setFocusPainted(false);
@@ -130,7 +135,7 @@ public class GoCreateRoom extends JPanel {
         rdThirteenSize.setFont(new Font("Arial", Font.BOLD, 24));
         rdThirteenSize.setForeground(Color.WHITE);
         rdThirteenSize.setBackground(GoMainFrame.COLOR_3);
-        rdThirteenSize.setBounds(390, 190, 120, 50);
+        rdThirteenSize.setBounds(390, 170, 120, 50);
         rdThirteenSize.setHorizontalAlignment(SwingConstants.CENTER);
         rdThirteenSize.setVerticalAlignment(SwingConstants.CENTER);
         rdThirteenSize.setFocusPainted(false);
@@ -150,7 +155,7 @@ public class GoCreateRoom extends JPanel {
         rdNineteenSize.setFont(new Font("Arial", Font.BOLD, 24));
         rdNineteenSize.setForeground(Color.WHITE);
         rdNineteenSize.setBackground(GoMainFrame.COLOR_3);
-        rdNineteenSize.setBounds(620, 190, 120, 50);
+        rdNineteenSize.setBounds(620, 170, 120, 50);
         rdNineteenSize.setHorizontalAlignment(SwingConstants.CENTER);
         rdNineteenSize.setVerticalAlignment(SwingConstants.CENTER);
         rdNineteenSize.setFocusPainted(false);
@@ -173,7 +178,7 @@ public class GoCreateRoom extends JPanel {
         lblPlayerType = new JLabel("Your Player Type");
         lblPlayerType.setFont(new Font("Arial", Font.BOLD, 24));
         lblPlayerType.setForeground(GoMainFrame.COLOR_2);
-        lblPlayerType.setBounds(185, 270, 200, 50);
+        lblPlayerType.setBounds(185, 250, 200, 50);
         lblPlayerType.setHorizontalAlignment(SwingConstants.CENTER);
         lblPlayerType.setVerticalAlignment(SwingConstants.CENTER);
         this.add(lblPlayerType);
@@ -182,7 +187,7 @@ public class GoCreateRoom extends JPanel {
                 Player.BLACK, 
                 new Font("Arial", Font.BOLD, 16), 
                 235,
-                325,
+                305,
                 120,
                 50
         );
@@ -197,7 +202,7 @@ public class GoCreateRoom extends JPanel {
         
         rdBlack = new JRadioButton();
         rdBlack.setBackground(GoMainFrame.COLOR_3);
-        rdBlack.setBounds(220, 325, 20, 50);
+        rdBlack.setBounds(220, 305, 20, 50);
         rdBlack.setFocusPainted(false);
         rdBlack.addItemListener(new ItemListener() {
             @Override
@@ -217,7 +222,7 @@ public class GoCreateRoom extends JPanel {
                 Player.WHITE, 
                 new Font("Arial", Font.BOLD, 16), 
                 235,
-                385,
+                365,
                 120,
                 50
         );
@@ -232,7 +237,7 @@ public class GoCreateRoom extends JPanel {
         
         rdWhite = new JRadioButton();
         rdWhite.setBackground(GoMainFrame.COLOR_3);
-        rdWhite.setBounds(220, 385, 20, 50);
+        rdWhite.setBounds(220, 365, 20, 50);
         rdWhite.setFocusPainted(false);
         rdWhite.addItemListener(new ItemListener() {
             @Override
@@ -255,7 +260,7 @@ public class GoCreateRoom extends JPanel {
         lblPlayerName = new JLabel("Your Name");
         lblPlayerName.setFont(new Font("Arial", Font.BOLD, 24));
         lblPlayerName.setForeground(GoMainFrame.COLOR_2);
-        lblPlayerName.setBounds(510, 270, 200, 50);
+        lblPlayerName.setBounds(510, 250, 200, 50);
         lblPlayerName.setHorizontalAlignment(SwingConstants.CENTER);
         lblPlayerName.setVerticalAlignment(SwingConstants.CENTER);
         this.add(lblPlayerName);
@@ -265,7 +270,7 @@ public class GoCreateRoom extends JPanel {
         txtPlayerName.setText(PLACEHOLDER);
         txtPlayerName.setForeground(Color.GRAY);
         txtPlayerName.setBackground(GoMainFrame.COLOR_3);
-        txtPlayerName.setBounds(525, 320, 175, 40);
+        txtPlayerName.setBounds(525, 300, 175, 40);
         txtPlayerName.setBorder(BorderFactory.createLineBorder(GoMainFrame.COLOR_2, 3));
         txtPlayerName.setCaretColor(Color.WHITE);
         txtPlayerName.setHorizontalAlignment(SwingConstants.CENTER);
@@ -286,6 +291,24 @@ public class GoCreateRoom extends JPanel {
             }
         });
         this.add(txtPlayerName);
+        
+        lblRoomCodeBanner = new JLabel("Room Code");
+        lblRoomCodeBanner.setFont(new Font("Arial", Font.BOLD, 24));
+        lblRoomCodeBanner.setForeground(GoMainFrame.COLOR_2);
+        lblRoomCodeBanner.setBounds(510, 345, 200, 50);
+        lblRoomCodeBanner.setHorizontalAlignment(SwingConstants.CENTER);
+        lblRoomCodeBanner.setVerticalAlignment(SwingConstants.CENTER);
+        this.add(lblRoomCodeBanner);
+        
+        lblRoomCodeValue = new JLabel(getFancyRoomCode());
+        lblRoomCodeValue.setFont(new Font("Arial", Font.BOLD, 24));
+        lblRoomCodeValue.setForeground(Color.WHITE);
+        lblRoomCodeValue.setBackground(GoMainFrame.COLOR_2);
+        lblRoomCodeValue.setOpaque(true);
+        lblRoomCodeValue.setBounds(510, 390, 200, 50);
+        lblRoomCodeValue.setHorizontalAlignment(SwingConstants.CENTER);
+        lblRoomCodeValue.setVerticalAlignment(SwingConstants.CENTER);
+        this.add(lblRoomCodeValue);
         
         lblStatus = new JLabel();
         lblStatus.setFont(new Font("Arial", Font.BOLD, 16));
@@ -475,5 +498,41 @@ public class GoCreateRoom extends JPanel {
         rdNineteenSize.setEnabled(bool);
         rdBlack.setEnabled(bool);
         rdWhite.setEnabled(bool);
+    }
+    
+    private String getFancyRoomCode() {
+        return toFancyRoomCode(getOwnIPAddress());
+    }
+    
+    private String getOwnIPAddress() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception ex) {
+            System.out.println(ex);
+            return null;
+        }
+    }
+    private String toFancyRoomCode(String IP) {
+        String[] tokens = IP.split("\\.");
+        String[] codes = new String[4];
+        for (int i = 0; i < codes.length; i++) {
+            int decimal = Integer.parseInt(tokens[i]);
+            String hex = Integer.toHexString(decimal);
+            if (hex.length() == 1) hex = "0"+hex;
+            codes[i] = hex;
+        }
+        String roomCode = codes[0]+codes[1]+"-"+codes[2]+codes[3];
+        return convertToAlphabets(codes[0]+codes[1]+"-"+codes[2]+codes[3]);
+    }
+    private String convertToAlphabets(String hex) {
+        StringBuilder sb = new StringBuilder();
+        for (char ch : hex.toCharArray()) {
+            if ('0' <= ch && ch <= '9') {
+                sb.append( (char)('G'+(ch-'0')) );
+            } else {
+                sb.append(Character.toUpperCase(ch));
+            }
+        }
+        return sb.toString();
     }
 }
