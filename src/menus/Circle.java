@@ -44,14 +44,14 @@ public class Circle {
         g.fillOval((int)(c-radius), (int)(r-radius), (int)(2*radius), (int)(2*radius));
         
         g.setStroke(new BasicStroke(2));
-        g.setColor(GoMainFrame.COLOR_2);
+        g.setColor(Color.WHITE);
         g.drawOval((int)(c-radius), (int)(r-radius), (int)(2*radius), (int)(2*radius));
     }
     
     // sama aja artinya dengan menyentuh atau bertabrakan dengan Circle lain
     public boolean isHurt(List<Circle> circleList) {
         for (Circle circle : circleList) {
-            if (circle.hp <= 350) continue;
+            if (circle.hp <= 400) continue;
             if (this.equals(circle)) continue;
             if (this.radius()+this.speedRadius+circle.radius()+circle.speedRadius >
                     Math.hypot(this.r()-circle.r(), this.c()-circle.c())) {

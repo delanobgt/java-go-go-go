@@ -18,7 +18,7 @@ import models.Point;
 
 public class PrettyBackground extends JPanel {
 
-    private final static int ANIMATION_DELAY = 5;
+    private final static int ANIMATION_DELAY = 3;
 
     private BufferedImage buffImg;
     private List<Point> whitePoints = new ArrayList<>();
@@ -29,7 +29,7 @@ public class PrettyBackground extends JPanel {
         this.setLocation(0, 0);
         this.setSize(new Dimension(GoMainFrame.FRAME_WIDTH, 200));
         this.setPreferredSize(new Dimension(GoMainFrame.FRAME_WIDTH, 200));
-        this.setBackground(GoMainFrame.COLOR_4);
+        this.setBackground(GoMainFrame.COLOR_2);
 
         buffImg = loadBufferedImage("/res/gogogo.jpg");
         whitePoints = findAllWhiteCoords(buffImg);

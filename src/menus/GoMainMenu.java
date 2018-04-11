@@ -22,6 +22,8 @@ public class GoMainMenu extends JPanel {
     JLabel multiOnBtn;
     JLabel howToPlayBtn;
     JLabel aboutBtn;
+    JLabel lblLeftInfo;
+    JLabel lblRightInfo;
     JLabel footerLbl;
     PrettyBackground prettyBackground;
     
@@ -97,8 +99,8 @@ public class GoMainMenu extends JPanel {
         howToPlayBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                parent.addComponent("multiOnMenu", new GoMultiOnMenu(parent));
-                parent.changeSceneTo("multiOnMenu");
+                parent.addComponent("howToPlay", new HowToPlay(parent));
+                parent.changeSceneTo("howToPlay");
             }
         });
         this.add(howToPlayBtn);
@@ -114,12 +116,41 @@ public class GoMainMenu extends JPanel {
         aboutBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                parent.addComponent("multiOnMenu", new GoMultiOnMenu(parent));
-                parent.changeSceneTo("multiOnMenu");
+                parent.addComponent("about", new About(parent));
+                parent.changeSceneTo("about");
             }
         });
         this.add(aboutBtn);
 
+        String htmlRightInfo = "<html><p><em>"
+                + "<span style=\"font-size: 28px;\">\"</span>The Traditional Go <br>"
+                + "&nbsp;now comes with <br>"
+                + "&nbsp;Brand New Feels!<span style=\"font-size: 28px;\">\"</span>"
+                + "</em></p></html>";
+        lblRightInfo = new JLabel(htmlRightInfo);
+        lblRightInfo.setFont(new Font("Arial", Font.BOLD, 24));
+        lblRightInfo.setForeground(GoMainFrame.COLOR_1);
+        lblRightInfo.setBackground(GoMainFrame.COLOR_3);
+//        lblRightInfo.setOpaque(true);
+        lblRightInfo.setBounds(575, 250, 300, 200); // x = 25
+        lblRightInfo.setHorizontalAlignment(SwingConstants.CENTER);
+        lblRightInfo.setVerticalAlignment(SwingConstants.CENTER);
+        this.add(lblRightInfo);
+        
+        String htmlLeftInfo = "<html><p><em>"
+                + "<span style=\"font-size: 28px;\">\"</span>Enjoy your<br>"
+                + "&nbsp;<span style=\"font-size: 38px;\">Go Adventure!</span><span style=\"font-size: 28px;\">\"</span>"
+                + "</em></p></html>";
+        lblLeftInfo = new JLabel(htmlLeftInfo);
+        lblLeftInfo.setFont(new Font("Arial", Font.BOLD, 24));
+        lblLeftInfo.setForeground(GoMainFrame.COLOR_1);
+        lblLeftInfo.setBackground(GoMainFrame.COLOR_3);
+//        lblLeftInfo.setOpaque(true);
+        lblLeftInfo.setBounds(25, 220, 300, 200); // x = 25
+        lblLeftInfo.setHorizontalAlignment(SwingConstants.CENTER);
+        lblLeftInfo.setVerticalAlignment(SwingConstants.CENTER);
+        this.add(lblLeftInfo);
+        
         final int FOOTER_HEIGHT = 30;
         final int FOOTER_WIDTH = getWidth();
         String html = "<html><body valign=middle>"

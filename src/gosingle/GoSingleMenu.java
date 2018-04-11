@@ -368,7 +368,7 @@ public class GoSingleMenu extends JPanel {
         this.add(lblStatus);
         
         btnCreate = new MaterialButton(
-                "Create Room!",
+                "Start Game!",
                 new Font("Arial", Font.BOLD, 20),
                 centerX(getWidth(), BTN_WIDTH),
                 520,
