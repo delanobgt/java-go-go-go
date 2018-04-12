@@ -266,8 +266,9 @@ public class Bot {
                     (stoneType.isBlack() ? "BLACK-" : "WHITE-") +
                     _convertListToKey(new ArrayList<>(freqOfPoint.keySet()));
             // if current connectedTerritories is larger than newly found one
-            if (!stoneToList.containsKey(existKey) || 
-                    stoneToList.get(existKey).size() > connectedTerritories.size()) {
+            if ((!stoneToList.containsKey(existKey) || 
+                    stoneToList.get(existKey).size() > connectedTerritories.size()) &&
+                    connectedTerritories.size() < board.getSize()*board.getSize()/2 ) {
                 stoneToList.put(existKey, connectedTerritories);
             }
             return true;

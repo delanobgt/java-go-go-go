@@ -191,8 +191,9 @@ public class GoModel implements Serializable {
                     (stoneType.isBlack() ? "BLACK-" : "WHITE-") +
                     _convertListToKey(new ArrayList<>(freqOfPoint.keySet()));
             // if current connectedTerritories is larger than newly found one
-            if (!stoneToList.containsKey(existKey) || 
-                    stoneToList.get(existKey).size() > connectedTerritories.size()) {
+            if ((!stoneToList.containsKey(existKey) || 
+                    stoneToList.get(existKey).size() > connectedTerritories.size()) &&
+                    connectedTerritories.size() < boardSize*boardSize/2 ) {
                 stoneToList.put(existKey, connectedTerritories);
             }
             return true;
