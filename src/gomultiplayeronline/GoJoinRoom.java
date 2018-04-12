@@ -50,7 +50,7 @@ public class GoJoinRoom extends JPanel {
     private static final int BTN_WIDTH = 200;
     private static final int BTN_HEIGHT = 50;
     private static final String PLACEHOLDER = "name...";
-    private static final String PLACEHOLDER2 = "room code...";
+    private static final String PLACEHOLDER2 = "ROOM CODE...";
 
     public GoJoinRoom(GoMainFrame parent) {
         this.parent = parent;
@@ -308,7 +308,8 @@ public class GoJoinRoom extends JPanel {
             lblStatus.setText("Name must have 3-7 characters!");
             return false;
         }
-        if (!txtRoomCode.getText().matches("[A-P]{4}-[A-P]{4}")) {
+        if (!txtRoomCode.getText().matches("[A-P]{4}-[A-P]{4}") && 
+                !txtRoomCode.getText().matches("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}")) {
             lblStatus.setBackground(Color.RED);
             lblStatus.setText("Please enter a valid Room Code!");
             return false;
@@ -360,6 +361,9 @@ public class GoJoinRoom extends JPanel {
     }
 
     private String toTraditionalIPAddress(String roomCode) {
+        if ( roomCode.matches("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}") ) {
+            return roomCode;
+        }
         roomCode = roomCode.toUpperCase();
         roomCode = convertToHex(roomCode);
         String[] tokens = roomCode.split("-");
