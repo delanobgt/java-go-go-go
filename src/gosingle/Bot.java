@@ -19,7 +19,7 @@ public class Bot {
         {
             put(BoardSize.SMALL.toString()+Difficulty.EASY.toString(), 1);
             put(BoardSize.SMALL.toString()+Difficulty.MEDIUM.toString(), 2);
-            put(BoardSize.SMALL.toString()+Difficulty.HARD.toString(), 3);
+            put(BoardSize.SMALL.toString()+Difficulty.HARD.toString(), 4);
             
             put(BoardSize.MEDIUM.toString()+Difficulty.EASY.toString(), 1);
             put(BoardSize.MEDIUM.toString()+Difficulty.MEDIUM.toString(), 2);
@@ -44,20 +44,22 @@ public class Bot {
         return bestPoint;
     }
     
-    private static int minimax(int minimax, ImmutableBoard board, int passCount, int blackScore, int whiteScore, StoneType stoneType, int depth) {
+    private static double minimax(int minimax, ImmutableBoard board, int passCount, int blackScore, int whiteScore, StoneType stoneType, int depth) {
         
         if (depth <= 0 || passCount >= 2) {
             scanTerritory(board);
-            int finalScore = whiteScore-blackScore;
+            double finalScore = 6.5+whiteScore-blackScore;
             finalScore += whiteTerritoryList.size()-blackTerritoryList.size();
             return finalScore;
         }
+        
+        List<Point> bestPoints = new ArrayList<>();
         
         String hash = getHash(board, passCount, stoneType);
         pointMemo.put(hash, null);
         
         List<Point> possiblePoints = getPossiblePoints(board);
-        int result = minimax == 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+        double result = minimax == 0 ? Double.MAX_VALUE : Double.MIN_VALUE;
         Point resultPoint = null;
         for (Point p : possiblePoints) {
             // coba taruh batu dulu
@@ -91,28 +93,38 @@ public class Bot {
             String nextHash = getHash(nextBoard, 0, stoneType);
             if (pointMemo.containsKey(nextHash)) continue;
             
-            int nextResult = 
+            double nextResult = 
                     minimax(minimax, nextBoard, 0, nextBlackScore, nextWhiteScore, stoneType.isBlack() ? StoneType.WHITE : StoneType.BLACK, depth-1);
-            if (minimax == 0 && nextResult < result)  {
+            if (nextResult == result) {
+                bestPoints.add(p);
+            } else if (minimax == 0 && nextResult < result)  {
+                bestPoints.clear();
                 result = nextResult;
                 resultPoint = p;
             } else if (minimax == 1 && nextResult > result)  {
+                bestPoints.clear();
                 result = nextResult;
                 resultPoint = p;
             }
         }
         {
-            int nextResult = 
+            double nextResult = 
                     minimax(minimax^1, board, passCount+1, blackScore, whiteScore, stoneType.isBlack() ? StoneType.WHITE : StoneType.BLACK, depth-1);
             if (minimax == 0 && nextResult < result)  {
+                bestPoints.clear();
                 result = nextResult;
                 resultPoint = null;
             } else if (minimax == 1 && nextResult > result)  {
+                bestPoints.clear();
                 result = nextResult;
                 resultPoint = null;
             }
         }
-        pointMemo.put(hash, resultPoint);
+        if (bestPoints.size() == 0) {
+            pointMemo.put(hash, null);
+        } else {
+            pointMemo.put(hash, bestPoints.get((int)(Math.random()*bestPoints.size())));
+        }
         if (possiblePoints.isEmpty()) {
             pointMemo.put(hash, new Point((int)(Math.random()*board.getSize()), (int)(Math.random()*board.getSize())));
         }

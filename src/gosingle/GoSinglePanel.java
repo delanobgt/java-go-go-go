@@ -223,6 +223,8 @@ public class GoSinglePanel extends JPanel {
                 parent.changeSceneTo("mainMenu");
             }
         }
+        if (!goModel.getTurn().equals(playerType))
+            setWaitingComputer(true);
     }
     
     public void updatePlayerStatus() {
