@@ -50,7 +50,7 @@ public class GoJoinRoom extends JPanel {
     private static final int BTN_WIDTH = 200;
     private static final int BTN_HEIGHT = 50;
     private static final String PLACEHOLDER = "name...";
-    private static final String PLACEHOLDER2 = "ROOM CODE...";
+    private static final String PLACEHOLDER2 = "ROOM CODE / IP...";
 
     public GoJoinRoom(GoMainFrame parent) {
         this.parent = parent;
@@ -121,10 +121,10 @@ public class GoJoinRoom extends JPanel {
         });
         this.add(txtFirstName);
 
-        lblRoomCode = new JLabel("Room Code");
+        lblRoomCode = new JLabel("Room Code / IP");
         lblRoomCode.setFont(new Font("Arial", Font.BOLD, 24));
         lblRoomCode.setForeground(GoMainFrame.COLOR_2);
-        lblRoomCode.setBounds(centerX(getWidth(), 200), 270, 200, 50);
+        lblRoomCode.setBounds(centerX(getWidth(), 250), 270, 250, 50);
         lblRoomCode.setHorizontalAlignment(SwingConstants.CENTER);
         lblRoomCode.setVerticalAlignment(SwingConstants.CENTER);
         this.add(lblRoomCode);
@@ -232,7 +232,7 @@ public class GoJoinRoom extends JPanel {
                     txtRoomCode.setEnabled(false);
 
                     new Thread(() -> {
-                        String IP = toTraditionalIPAddress(txtRoomCode.getText());
+                        String IP = Networking.toTraditionalIPAddress(txtRoomCode.getText());
                         roomInfoClient = new RoomInfoClient(IP, GoMainFrame.ROOM_INFO_SERVER_PORT);
                         RoomModel roomModel = roomInfoClient.getRoomModel();
                         roomInfoClient.close();
@@ -358,41 +358,5 @@ public class GoJoinRoom extends JPanel {
             roomInfoClient.close();
             roomInfoClient = null;
         }
-    }
-
-    private String toTraditionalIPAddress(String roomCode) {
-        if ( roomCode.matches("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}") ) {
-            return roomCode;
-        }
-        roomCode = roomCode.toUpperCase();
-        roomCode = convertToHex(roomCode);
-        String[] tokens = roomCode.split("-");
-        String[] hexes = {
-            tokens[0].substring(0, 2),
-            tokens[0].substring(2, 4),
-            tokens[1].substring(0, 2),
-            tokens[1].substring(2, 4)
-        };
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < hexes.length; i++) {
-            sb.append(String.format(
-                    "%s%d",
-                    i > 0 ? "." : "",
-                    Integer.parseInt(hexes[i], 16)
-            ));
-        }
-        return sb.toString();
-    }
-
-    private String convertToHex(String alphabets) {
-        StringBuilder sb = new StringBuilder();
-        for (char ch : alphabets.toCharArray()) {
-            if (ch >= 'G') {
-                sb.append((char) ('0' + (ch - 'G')));
-            } else {
-                sb.append(Character.toUpperCase(ch));
-            }
-        }
-        return sb.toString();
     }
 }

@@ -14,10 +14,10 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.InetAddress;
 import java.net.Socket;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -50,14 +50,23 @@ public class GoCreateRoom extends JPanel {
     JTextField txtPlayerName;
     
     JLabel lblRoomCodeBanner;
+    JLabel lblRoomCodeType;
     JLabel lblRoomCodeValue;
+    JLabel lblRoomCodeRefresh;
     
     JLabel lblStatus;
     JLabel btnCreate;
  
     RoomInfoServer roomInfoServer; 
     GameServer gameServer;
- 
+
+    private int roomCodeType = 0;
+    private ImageIcon[] roomCodeIcons = {
+            new ImageIcon(GoCreateRoom.class.getResource("/res/wifi.png")),
+            new ImageIcon(GoCreateRoom.class.getResource("/res/lan.png"))
+    };
+    private ImageIcon refreshIcon = new ImageIcon(GoCreateRoom.class.getResource("/res/refresh.png"));
+    private String[] roomCodePrefixes = {"wlan", "eth"};
     private volatile boolean waiting = false;
     private Timer timer;
     
@@ -300,15 +309,75 @@ public class GoCreateRoom extends JPanel {
         lblRoomCodeBanner.setVerticalAlignment(SwingConstants.CENTER);
         this.add(lblRoomCodeBanner);
         
-        lblRoomCodeValue = new JLabel(getFancyRoomCode());
+        lblRoomCodeType = new JLabel();
+        lblRoomCodeType.setIcon(roomCodeIcons[roomCodeType]);
+        lblRoomCodeType.setFont(new Font("Arial", Font.BOLD, 24));
+        lblRoomCodeType.setForeground(Color.WHITE);
+        lblRoomCodeType.setBackground(GoMainFrame.COLOR_2);
+        lblRoomCodeType.setOpaque(true);
+        lblRoomCodeType.setBounds(480, 390, 50, 50);
+        lblRoomCodeType.setHorizontalAlignment(SwingConstants.CENTER);
+        lblRoomCodeType.setVerticalAlignment(SwingConstants.CENTER);
+        lblRoomCodeType.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(MouseEvent e) {lblRoomCodeType.setBackground(GoMainFrame.COLOR_2);}
+            @Override
+            public void mouseEntered(MouseEvent e) {lblRoomCodeType.setBackground(GoMainFrame.COLOR_2.darker());}
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                roomCodeType ^= 1;
+                lblRoomCodeType.setIcon(roomCodeIcons[roomCodeType]);
+                String fancyCode = Networking.getFancyRoomCode(roomCodePrefixes[roomCodeType]);
+                if (fancyCode == null) {
+                    lblRoomCodeValue.setFont(new Font("Arial", Font.BOLD, 18));
+                } else {
+                    lblRoomCodeValue.setFont(new Font("Arial", Font.BOLD, 24));            
+                }
+                lblRoomCodeValue.setText(
+                        fancyCode == null ? "UNAVAILABLE" : fancyCode
+                );
+            }
+        });
+        this.add(lblRoomCodeType);
+        
+        lblRoomCodeValue = new JLabel(Networking.getFancyRoomCode("wlan"));
         lblRoomCodeValue.setFont(new Font("Arial", Font.BOLD, 24));
         lblRoomCodeValue.setForeground(Color.WHITE);
         lblRoomCodeValue.setBackground(GoMainFrame.COLOR_2);
         lblRoomCodeValue.setOpaque(true);
-        lblRoomCodeValue.setBounds(510, 390, 200, 50);
+        lblRoomCodeValue.setBounds(530, 390, 160, 50);
         lblRoomCodeValue.setHorizontalAlignment(SwingConstants.CENTER);
         lblRoomCodeValue.setVerticalAlignment(SwingConstants.CENTER);
         this.add(lblRoomCodeValue);
+        
+        lblRoomCodeRefresh = new JLabel();
+        lblRoomCodeRefresh.setIcon(refreshIcon);
+        lblRoomCodeRefresh.setFont(new Font("Arial", Font.BOLD, 24));
+        lblRoomCodeRefresh.setForeground(Color.WHITE);
+        lblRoomCodeRefresh.setBackground(GoMainFrame.COLOR_2);
+        lblRoomCodeRefresh.setOpaque(true);
+        lblRoomCodeRefresh.setBounds(690, 390, 50, 50);
+        lblRoomCodeRefresh.setHorizontalAlignment(SwingConstants.CENTER);
+        lblRoomCodeRefresh.setVerticalAlignment(SwingConstants.CENTER);
+        lblRoomCodeRefresh.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(MouseEvent e) {lblRoomCodeRefresh.setBackground(GoMainFrame.COLOR_2);}
+            @Override
+            public void mouseEntered(MouseEvent e) {lblRoomCodeRefresh.setBackground(GoMainFrame.COLOR_2.darker());}
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                String fancyCode = Networking.getFancyRoomCode(roomCodePrefixes[roomCodeType]);
+                if (fancyCode == null) {
+                    lblRoomCodeValue.setFont(new Font("Arial", Font.BOLD, 18));
+                } else {
+                    lblRoomCodeValue.setFont(new Font("Arial", Font.BOLD, 24));            
+                }
+                lblRoomCodeValue.setText(
+                        fancyCode == null ? "UNAVAILABLE" : fancyCode
+                );
+            }
+        });
+        this.add(lblRoomCodeRefresh);
         
         lblStatus = new JLabel();
         lblStatus.setFont(new Font("Arial", Font.BOLD, 16));
@@ -498,41 +567,5 @@ public class GoCreateRoom extends JPanel {
         rdNineteenSize.setEnabled(bool);
         rdBlack.setEnabled(bool);
         rdWhite.setEnabled(bool);
-    }
-    
-    private String getFancyRoomCode() {
-        return toFancyRoomCode(getOwnIPAddress());
-    }
-    
-    private String getOwnIPAddress() {
-        try {
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (Exception ex) {
-            System.out.println(ex);
-            return null;
-        }
-    }
-    private String toFancyRoomCode(String IP) {
-        String[] tokens = IP.split("\\.");
-        String[] codes = new String[4];
-        for (int i = 0; i < codes.length; i++) {
-            int decimal = Integer.parseInt(tokens[i]);
-            String hex = Integer.toHexString(decimal);
-            if (hex.length() == 1) hex = "0"+hex;
-            codes[i] = hex;
-        }
-        String roomCode = codes[0]+codes[1]+"-"+codes[2]+codes[3];
-        return convertToAlphabets(codes[0]+codes[1]+"-"+codes[2]+codes[3]);
-    }
-    private String convertToAlphabets(String hex) {
-        StringBuilder sb = new StringBuilder();
-        for (char ch : hex.toCharArray()) {
-            if ('0' <= ch && ch <= '9') {
-                sb.append( (char)('G'+(ch-'0')) );
-            } else {
-                sb.append(Character.toUpperCase(ch));
-            }
-        }
-        return sb.toString();
     }
 }
